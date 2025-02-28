@@ -1,0 +1,10 @@
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+LinearMaps = "7a12625a-238d-50fd-b39a-03d52299707e"
+MultivariateStats = "6f286f6a-111f-5878-ab1e-185364afe411"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+PyCall = "438e738f-606a-5dbb-bf0a-cddfbfd45ab0"
+QuantumDots = "312194fd-fec5-4b07-ba1c-a40d7013a56a"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+SymPy = "24249f21-da20-56a4-8eb1-6a02cf4ae2e6"
