@@ -27,8 +27,8 @@ function measure_states(state_list, eff_measurments)
     result = zeros(n_states, n_measurements)
     for (i, state) in enumerate(state_list)
         for (j, eff_measurment) in enumerate(eff_measurments)
-            trunc_state = state[[4, 8, 9, 13],[4, 8, 9, 13]]
-            result[i, j] = real(tr(eff_measurment * trunc_state))
+            trunc_state = state[get_qubit_idx(),get_qubit_idx()]
+            result[i, j] = expectation_value(trunc_state, eff_measurment)
         end
     end    
     return result

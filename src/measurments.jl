@@ -28,7 +28,12 @@ nbr_op(n :: Integer, d :: FermionBasis) = d[n, :↑]'*d[n, :↑] + d[n, :↓]'*d
 # 2 charges operator
 nbr2_op(n :: Integer, d :: FermionBasis) = d[n, :↑]'*d[n, :↑]*d[n, :↓]'*d[n, :↓]
 
-expectation_value(ρ :: AbstractMatrix, op :: AbstractMatrix) = process_complex(tr(ρ*op))
+function expectation_value(ρ :: AbstractMatrix, op :: AbstractMatrix)
+    if !isapprox(op, op')
+        throw(ArgumentError("Operator is not Hermitian: $(op)"))
+    end
+    return process_complex(tr(ρ*op))
+end
 
 function process_complex(value, tolerance=1e-3)
     if abs(imag(value)) > tolerance
