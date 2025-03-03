@@ -119,8 +119,8 @@ function uniform_separable_two_qubit_states(d :: FermionBasis, dA :: FermionBasi
     Takes a FermionBasis of two QuantumDots
     Returns a list of N^4 pure separable states by taking the tensor product of N^2 single qubit states uniformly sampled from the Bloch sphere
     """
-    vA_list = single_qubit_states(dA, N)
-    vB_list = single_qubit_states(dB, N)
+    vA_list = uniform_single_qubit_states(dA, N)
+    vB_list = uniform_single_qubit_states(dB, N)
 
     ρ_list = [wedge([vA*vA', vB*vB'], [dA, dB], d) for vA ∈ vA_list for vB ∈ vB_list]
     
