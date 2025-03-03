@@ -23,7 +23,7 @@ function get_eff_measurment(measurment_op :: AbstractMatrix, ρ_r :: AbstractMat
     lmap = if truncate_density_matrix
         lmap = LinearMap(f_vec_trunc, 1, 16)
     else
-        lmap = LinearMap(f_vec, 1, 16)
+        lmap = LinearMap(f_vec, 1, 16^2)
     end
 
     n_eff_trunc = sparse(reshape(Matrix{Complex{Float64}}(lmap), 4, 4))
