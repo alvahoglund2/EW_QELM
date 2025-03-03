@@ -20,7 +20,7 @@ hamiltonian_type = Hdot_so_b
 h_seed = 1
 hamiltonian = random_hamiltonian_no_seed(d, hamiltonian_type, seed = h_seed)
 
-qn = (1,1)
+qn = 3
 ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
 
 ent_state_types = [singlet_state]

@@ -10,7 +10,7 @@ function get_eff_measurment(measurment_op :: AbstractMatrix, ρ_r :: AbstractMat
     function f_vec_trunc(ρ_I_vec_trunc)
         ρ_I_trunc = reshape(ρ_I_vec_trunc, 4, 4)
         ρ_I = zeros(Complex{Float64}, 16, 16)
-        ρ_I[[4, 8, 9, 13],[4, 8, 9, 13]] = ρ_I_trunc
+        ρ_I[get_qubit_idx(),get_qubit_idx()] = ρ_I_trunc
         return exp_value(ρ_I)
     end
     

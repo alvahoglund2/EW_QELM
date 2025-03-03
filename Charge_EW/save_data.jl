@@ -23,7 +23,7 @@ d, d_main, dA_main, dB_main, d_res = total_basis(sys_qd, res_qd)
 hamiltonian_type = Hdot_so_b
 hamiltonian = random_hamiltonian_no_seed(d, hamiltonian_type)
 
-qn = (1,1)
+qn = 2
 ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
 
 ## ------------ Save data ----------------

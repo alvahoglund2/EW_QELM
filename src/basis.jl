@@ -5,7 +5,7 @@ function def_basis(qd_nbrs::AbstractVector{<:Integer})
     Return a fermion basis sorted on spin for a given set of labeled quantum dots. 
     """
     spins = (:↑, :↓)
-    qn = IndexConservation(:↑) * IndexConservation(:↓)
+    qn = QuantumDots.fermionnumber
     labels_all = [(i, s) for i in qd_nbrs for s in spins]
     return FermionBasis(labels_all; qn)
     println(qd_nbrs)
@@ -52,4 +52,8 @@ end
 
 function get_basis_dim(d :: FermionBasis)
     return 2^length(keys(d))
+end
+
+function get_qubit_idx()
+    return [7, 8, 9, 10]
 end
