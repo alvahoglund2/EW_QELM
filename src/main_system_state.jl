@@ -96,3 +96,33 @@ function random_separable_state(d :: FermionBasis, dA :: FermionBasis, dB :: Fer
     ρ = wedge([ρ1, ρ2], [dA, dB], d)
     return ρ
 end
+
+function uniform_single_qubit_states(d :: FermionBasis, N :: Integer)
+    """
+    Takes a FermionBasis of a single QuantumDot
+    Returns N^2 uniformly distributed pure states on the Bloch sphere
+    """
+    v0 = vac_state(d)
+    i = get_spatial_labels(d)[1]
+    vup = d[i, :↑]'*v0
+    vdown = d[i, :↓]'*v0
+
+    θ_list = acos.(2 .* range(0, 1, length=N) .- 1) 
+    ϕ_list = range(0, 2*π, length=N)
+    v_list = [cos(θ/2)*vup + exp(im*ϕ)*sin(θ/2)*vdown for θ ∈ θ_list for ϕ ∈ ϕ_list]
+    
+    return v_list
+end
+
+function uniform_separable_two_qubit_states(d :: FermionBasis, dA :: FermionBasis, dB :: FermionBasis, N :: Integer)
+    """
+    Takes a FermionBasis of two QuantumDots
+    Returns a list of N^4 pure separable states by taking the tensor product of N^2 single qubit states uniformly sampled from the Bloch sphere
+    """
+    vA_list = single_qubit_states(dA, N)
+    vB_list = single_qubit_states(dB, N)
+
+    ρ_list = [wedge([vA*vA', vB*vB'], [dA, dB], d) for vA ∈ vA_list for vB ∈ vB_list]
+    
+    return ρ_list
+end
