@@ -1,9 +1,9 @@
 function charge_measurments(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatrix , t_eval, 
     d :: FermionBasis, d_main :: FermionBasis, dA_main :: FermionBasis, dB_main :: FermionBasis, d_res :: FermionBasis, 
     nbr_ent_states :: Integer, nbr_sep_states :: Integer, ent_state_types, p_min)
-
+    N_sep = nbr_sep_states^(1/4) |> round |> Int
     ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
-    sep_states =  [random_separable_state(d_main, dA_main, dB_main) for i in 1:nbr_sep_states]
+    sep_states = uniform_separable_two_qubit_states(d_main, dA_main, dB_main, N_sep)
     eff_measurments = get_effective_measurments(hamiltonian, ρ_R, t_eval, d, d_main, d_res)
 
     ent_states_measurments = measure_states(ent_states, eff_measurments)
@@ -29,7 +29,7 @@ function measure_states(state_list, eff_measurments)
     for (i, state) in enumerate(state_list)
         for (j, eff_measurment) in enumerate(eff_measurments)
             trunc_state = state[get_qubit_idx(),get_qubit_idx()]
-            result[i, j] = real(tr(eff_measurment * trunc_state))
+            result[i, j] = expectation_value(trunc_state, eff_measurment)
         end
     end    
     return result
