@@ -3,7 +3,7 @@ Pkg.activate(pwd())
 Pkg.instantiate()
 
 using Plots
-using QuantumDots
+using QuantumDots, QuantumDots.BlockDiagonals
 using Random
 using SparseArrays
 using LinearAlgebra
