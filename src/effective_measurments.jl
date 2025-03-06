@@ -5,7 +5,7 @@ function get_eff_measurment(measurment_op :: AbstractMatrix, ρ_r :: AbstractMat
 
     op_ev = operator_evolution(measurment_op, t_ev, hamiltonian)
 
-    exp_value(ρ_I) = tr(wedge([ρ_I, ρ_r], [d_main, d_res], d)*op_ev)
+    exp_value(ρ_I) = tr(wedge([sparse(ρ_I), ρ_r], [d_main, d_res], d)*op_ev)
 
     function f_vec_trunc(ρ_I_vec_trunc)
         ρ_I_trunc = reshape(ρ_I_vec_trunc, 4, 4)'
