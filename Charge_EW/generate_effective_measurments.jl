@@ -6,8 +6,8 @@ function charge_measurments(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatri
     sep_states = uniform_separable_two_qubit_states(d_main, dA_main, dB_main, N_sep)
     eff_measurments = get_effective_measurments(hamiltonian, ρ_R, t_eval, d, d_main, d_res)
 
-    ent_states_measurments = measure_states(ent_states, eff_measurments)
-    sep_states_measurments = measure_states(sep_states, eff_measurments)
+    ent_states_measurments = measure_states(ent_states, eff_measurments,d_main)
+    sep_states_measurments = measure_states(sep_states, eff_measurments, d_main)
 
     return sep_states_measurments, ent_states_measurments
 end
@@ -22,13 +22,13 @@ function get_effective_measurments(hamiltonian :: AbstractMatrix, ρ_R :: Abstra
     return eff_measurments
 end
 
-function measure_states(state_list, eff_measurments)
+function measure_states(state_list, eff_measurments, d_main)
     n_states = length(state_list)
     n_measurements = length(eff_measurments)
     result = zeros(n_states, n_measurements)
     for (i, state) in enumerate(state_list)
         for (j, eff_measurment) in enumerate(eff_measurments)
-            trunc_state = state[get_qubit_idx(),get_qubit_idx()]
+            trunc_state = state[get_two_qubit_idx(d_main),get_two_qubit_idx(d_main)]
             result[i, j] = expectation_value(trunc_state, eff_measurment)
         end
     end    

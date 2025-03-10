@@ -10,7 +10,7 @@ function get_eff_measurment(measurment_op :: AbstractMatrix, ρ_r :: AbstractMat
     function f_vec_trunc(ρ_I_vec_trunc)
         ρ_I_trunc = reshape(ρ_I_vec_trunc, 4, 4)'
         ρ_I = zeros(Complex{Float64}, 16, 16)
-        ρ_I[get_qubit_idx(),get_qubit_idx()] = ρ_I_trunc
+        ρ_I[get_two_qubit_idx(d_main),get_two_qubit_idx(d_main)] = ρ_I_trunc
         return exp_value(ρ_I)
     end
     
@@ -21,10 +21,10 @@ function get_eff_measurment(measurment_op :: AbstractMatrix, ρ_r :: AbstractMat
 
     n_eff = nothing
     if truncate_density_matrix
-        lmap = LinearMap(f_vec_trunc, 1, 16)
+        lmap = LinearMaps.LinearMap(f_vec_trunc, 1, 16)
         n_eff = sparse(reshape(Matrix{Complex{Float64}}(lmap), 4, 4))
     else
-        lmap = LinearMap(f_vec, 1, 16^2)
+        lmap = LinearMaps.LinearMap(f_vec, 1, 16^2)
         n_eff = sparse(reshape(Matrix{Complex{Float64}}(lmap), 16, 16))
     end
 

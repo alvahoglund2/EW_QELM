@@ -1,6 +1,7 @@
 function vac_state(d :: FermionBasis)
     v0 = zeros(2^length(keys(d)))
-    v0[1] = 1
+    vacuumind = QuantumDots.focktoind(FockNumber(0), d.symmetry)
+    v0[vacuumind] = 1
     v0 = sparse(v0)
     return v0
 end

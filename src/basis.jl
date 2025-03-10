@@ -54,6 +54,11 @@ function get_basis_dim(d :: FermionBasis)
     return 2^length(keys(d))
 end
 
-function get_qubit_idx()
-    return [7, 8, 9, 10]
+function get_two_qubit_idx(d_main :: FermionBasis)
+    v0 = vac_state(d_main)
+    uu_idx =findall(!iszero, d_main[1, :↑]'d_main[2, :↑]'*v0)[1]
+    ud_idx =findall(!iszero, d_main[1, :↑]'d_main[2, :↓]'*v0)[1]
+    du_idx =findall(!iszero, d_main[1, :↓]'d_main[2, :↑]'*v0)[1]
+    dd_idx =findall(!iszero, d_main[1, :↓]'d_main[2, :↓]'*v0)[1]
+    return sort!([uu_idx, ud_idx, du_idx, dd_idx])
 end

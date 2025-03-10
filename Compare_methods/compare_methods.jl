@@ -52,7 +52,7 @@ measurments_heisenberg = measure_states(states_tot, evolved_ops)
 
 ## ------------ Effective measurments ----------------
 eff_measurments = [get_eff_measurment(op, ρ_R, hamiltonian, t_eval, d, d_main, d_res) for op in ops]
-states_trunc = [state[get_qubit_idx(),get_qubit_idx()] for state in states]
+states_trunc = [state[get_two_qubit_idx(d_main),get_two_qubit_idx(d_main)] for state in states]
 measurments_effective = measure_states(states_trunc, eff_measurments)
 
 ## ------------ Compare ----------------
