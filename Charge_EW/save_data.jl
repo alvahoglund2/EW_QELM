@@ -13,17 +13,19 @@ noise_level_min = 0.8
 
 t_eval = 1.0
 
-nbr_ent_states = 10000
+nbr_ent_states = 100
 nbr_sep_states = 10000
 
 sys_qd = 2
-res_qd = 3
+res_qd = 2
 
-d, d_main, dA_main, dB_main, d_res = total_basis(sys_qd, res_qd)
-hamiltonian_type = Hdot_so_b
-hamiltonian = random_hamiltonian_no_seed(d, hamiltonian_type)
+conserved_qn = IndexConservation(:↑) * IndexConservation(:↓)
+d, d_main, dA_main, dB_main, d_res = total_basis(sys_qd, res_qd, conserved_qn = conserved_qn)
+hamiltonian_type = Hdot_b
 
-qn = 2
+hamiltonian = random_hamiltonian_rng(d, hamiltonian_type, seed=4)
+
+qn = (1,1)
 ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
 
 ## ------------ Save data ----------------
