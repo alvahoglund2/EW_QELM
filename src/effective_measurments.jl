@@ -56,7 +56,7 @@ function get_eff_measurment(op_ev :: AbstractMatrix, ρ_r :: AbstractMatrix,
 end
 
 function get_eff_measurments(measurment_ops, ρ_r :: AbstractMatrix,
-    hamiltonian :: AbstractMatrix, t_ev, 
+    hamiltonian :: AbstractMatrix, t_eval, 
     d :: FermionBasis, d_main :: FermionBasis, d_res :: FermionBasis, 
     focknbrs)
     """
