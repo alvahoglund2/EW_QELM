@@ -26,11 +26,13 @@ hamiltonian_type = Hdot_b
 hamiltonian = random_hamiltonian_rng(d, hamiltonian_type, seed=4)
 
 qn = (1,1)
+focknbrs = [(3,1), (2,2), (1,3)]
+
 ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
 
 ## ------------ Save data ----------------
-sep_measurments_train, ent_measurments_train = charge_measurments(hamiltonian, ρ_R, t_eval, d, d_main, dA_main, dB_main, d_res, nbr_ent_states, nbr_sep_states, ent_state_types, noise_level_min)
-sep_measurments_test, ent_measurments_test = charge_measurments(hamiltonian, ρ_R, t_eval, d, d_main, dA_main, dB_main, d_res, nbr_ent_states, nbr_sep_states, ent_state_types, noise_level_min) 
+sep_measurments_train, ent_measurments_train = charge_measurments(hamiltonian, ρ_R, t_eval, d, d_main, dA_main, dB_main, d_res, nbr_ent_states, nbr_sep_states, ent_state_types, noise_level_min, focknbrs)
+sep_measurments_test, ent_measurments_test = charge_measurments(hamiltonian, ρ_R, t_eval, d, d_main, dA_main, dB_main, d_res, nbr_ent_states, nbr_sep_states, ent_state_types, noise_level_min, focknbrs) 
 
 labels_train = vcat([-1 for i in 1:ent_measurments_train.size[1]], [1 for i in 1:sep_measurments_train.size[1]])
 measurments_train = vcat(hcat(ent_measurments_train), hcat(sep_measurments_train))
