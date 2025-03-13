@@ -29,7 +29,7 @@ function measure_states(state_list, eff_measurments, d_main :: FermionBasis)
     result = zeros(n_states, n_measurements)
     for (i, state) in enumerate(state_list)
         for (j, eff_measurment) in enumerate(eff_measurments)
-            trunc_state = state[get_two_qubit_idx(d_main),get_two_qubit_idx(d_main)]
+            trunc_state = state[get_qubit_idx(d_main),get_qubit_idx(d_main)]
             result[i, j] = expectation_value(trunc_state, eff_measurment)
         end
     end    
