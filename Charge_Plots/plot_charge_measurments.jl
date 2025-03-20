@@ -8,55 +8,81 @@ includet("../src/effective_measurments.jl")
 includet("generate_effective_measurments.jl")
 
 ## -------------- Define System ----------------
+ent_state_types = [triplet0_state]
+sep_state_types = [random_separable_state]
+mix_sep_state_types = [random_separable_mixed_state]
+state_types = [ent_state_types, sep_state_types, mix_sep_state_types]
+
+noise_level_min = 1/3
+
 t_eval = 1.0
+
+nbr_ent_states =1000
 nbr_sep_states = 10000
-nbr_ent_states = 10000
+nbr_mix_sep_states = 10000
+
+nbr_states = [nbr_ent_states, nbr_sep_states, nbr_mix_sep_states]
 
 sys_qd = 2
 res_qd = 3
 
-d, d_main, dA_main, dB_main, d_res = total_basis(sys_qd, res_qd)
+conserved_qn = QuantumDots.fermionnumber
+d, d_main, dA_main, dB_main, d_res = total_basis(sys_qd, res_qd, conserved_qn = conserved_qn)
 hamiltonian_type = Hdot_so_b
-h_seed = 10
-hamiltonian = random_hamiltonian_no_seed(d, hamiltonian_type, seed = h_seed)
 
-qn = 0
-fock_nbrs = qn+2
+hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=4)
+
+qn = 2
+focknbrs = 2+qn
+
 ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
 
-ent_state_types = [singlet_state]
-p_min = 0.8
+
 ## ------------ Measure states ----------------
+sep_measurments, ent_measurments, mix_sep_measurements= charge_measurments(hamiltonian, ρ_R, t_eval, d, d_main, dA_main, dB_main, d_res, nbr_states, state_types, noise_level_min, focknbrs)
 
-sep_states = [random_separable_state(d_main, dA_main, dB_main) for i in 1:nbr_sep_states]
-ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
+all_measurments = vcat(sep_measurments, ent_measurments, mix_sep_measurements)
 
-eff_measurments = get_effective_measurments(hamiltonian, ρ_R, t_eval, d, d_main, d_res, fock_nbrs)
+using Polyhedra, CDDLib
 
-sep_measuments = measure_states(sep_states, eff_measurments, d_main)
-ent_measurments = measure_states(ent_states, eff_measurments, d_main)
+function get_extreme_points(v)
+    p = polyhedron(v, CDDLib.Library())
+    removevredundancy!(p)
+    return points(p)
+end
 
-all_measurments = vcat(sep_measuments, ent_measurments)
+
+v = vrep(sep_measurments[1:1000,:])
+@time p =get_extreme_points(v)
+p
 
 ## ------------ pca ----------------
 
 using MultivariateStats
 
 pca = fit(PCA, real(all_measurments)', maxoutdim=3, pratio=1.0)
-pca_sep_measurments = predict(pca, real(sep_measuments)')
+pca_sep_measurments = predict(pca, real(sep_measurments)')
 pca_ent_measurments = predict(pca, real(ent_measurments)')
+pca_mix_sep_measurements = predict(pca, real(mix_sep_measurements)')
 
 ## ------------ Save data ----------------
-#labels = vcat([-1 for i in 1:size(ent_measurments,1)], [1 for i in 1:size(sep_measuments,1)])
+labels = vcat([-1 for i in 1:size(ent_measurments,1)], [1 for i in 1:size(sep_measurments,1)], [0 for i in 1:size(mix_sep_measurements,1)])
 
-#np.save("Charge_Plots/data/measurments.npy", all_measurments)
-#np.save("Charge_Plots/data/labels.npy", labels)
+np.save("Charge_Plots/data/measurments.npy", all_measurments)
+np.save("Charge_Plots/data/labels.npy", labels)
 
 ## ------------ plot ----------------
 
-using Plots
-plotly()
-# Plot a 3D scatter plot
+ρ=random_separable_mixed_state(d_main, dA_main, dB_main)
 
-scatter(pca_sep_measurments[1,:],pca_sep_measurments[2,:], pca_sep_measurments[3,:], label = "Separable States", xlabel = "PC1", ylabel = "PC2", zlabel = "PC3",  legend=:topright)
+tr(ρ^2)
+
+# Plot a 3D scatter plot
+using Plots
+
+plotlyjs()
+
+scatter(pca_sep_measurments[1,:],pca_sep_measurments[2,:], pca_sep_measurments[3,:], label = "Pure Separable States", xlabel = "PC1", ylabel = "PC2", zlabel = "PC3",  legend=:topright)
 scatter!(pca_ent_measurments[1,:],pca_ent_measurments[2,:], pca_ent_measurments[3,:], label = "Entangled States", xlabel = "PC1", ylabel = "PC2", zlabel = "PC3")
+scatter!(pca_mix_sep_measurements[1,:],pca_mix_sep_measurements[2,:], pca_mix_sep_measurements[3,:], label = "Mixed Separable States", xlabel = "PC1", ylabel = "PC2", zlabel = "PC3")
+

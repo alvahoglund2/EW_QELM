@@ -23,7 +23,7 @@ conserved_qn = IndexConservation(:↑) * IndexConservation(:↓)
 d, d_main, dA_main, dB_main, d_res = total_basis(sys_qd, res_qd, conserved_qn = conserved_qn)
 hamiltonian_type = Hdot_b
 
-hamiltonian = random_hamiltonian_rng(d, hamiltonian_type, seed=4)
+hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=4)
 
 qn = (1,1)
 focknbrs = [(3,1), (2,2), (1,3)]
