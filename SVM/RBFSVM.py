@@ -4,6 +4,8 @@ from sklearn import svm
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.lines import Line2D
+
 
 def load_data(train_data_path, train_labels_path, test_data_path, test_labels_path):
     X_train = np.load(train_data_path)
@@ -57,14 +59,10 @@ def pca_visualization(X_train_scaled, y_train):
     scatter = ax.scatter(X_train_pca[:, 0], X_train_pca[:, 1], X_train_pca[:, 2], 
                          c=colors, edgecolors='k')
 
-    # Add labels for the axes
     ax.set_xlabel('PC1')
     ax.set_ylabel('PC2')
     ax.set_zlabel('PC3')
-    ax.set_title("All Werner States")
 
-    # Create a legend
-    from matplotlib.lines import Line2D
     legend_elements = [
         Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Separable states'),
         Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Werner states, p>0.5'),
@@ -76,8 +74,8 @@ def pca_visualization(X_train_scaled, y_train):
 
 def main():
     X_train, y_train, X_test, y_test = load_data(
-        "Charge_EW\data_mixed_separable\measurments_test.npy", "Charge_EW\data_mixed_separable\labels_train.npy", 
-        "Charge_EW\data_mixed_separable\measurments_train.npy", "Charge_EW\data_mixed_separable\labels_test.npy")
+        "Charge_EW\data\measurments_train.npy", "Charge_EW\data\labels_train.npy", 
+        "Charge_EW\data\measurments_test.npy", "Charge_EW\data\labels_test.npy")
 
     X_train_scaled, X_test_scaled = normalize_data(X_train, X_test)
     clf = train_svm(X_train_scaled, y_train)

@@ -5,44 +5,58 @@ includet("../src/measurments.jl")
 includet("../src/main_system_state.jl")
 includet("../src/reservoir_state.jl")
 includet("../src/effective_measurments.jl")
-includet("generate_effective_measurments.jl")
-
+includet("../src/generate_data.jl")
 ## -------------- Define System ----------------
-ent_state_types = [singlet_state]
-noise_level_min = 0.8
 
-t_eval = 1.0
+function define_system_parameters()
+    ent_state_types = [triplet0_state]
+    sep_state_types = [random_separable_state]
+    state_types = [ent_state_types, sep_state_types]
 
-nbr_ent_states = 100
-nbr_sep_states = 10000
+    noise_level_min = 0.8
 
-sys_qd = 2
-res_qd = 2
+    t_eval = 1.0
 
-conserved_qn = IndexConservation(:↑) * IndexConservation(:↓)
-d, d_main, dA_main, dB_main, d_res = total_basis(sys_qd, res_qd, conserved_qn = conserved_qn)
-hamiltonian_type = Hdot_b
+    nbr_sep_states = 10000
+    nbr_mix_sep_states = 100000
+    nbr_ent_states = nbr_sep_states+ nbr_mix_sep_states
 
-hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=4)
+    nbr_states = [nbr_ent_states, nbr_sep_states, nbr_mix_sep_states]
 
-qn = (1,1)
-focknbrs = [(3,1), (2,2), (1,3)]
+    sys_qd = 2
+    res_qd = 2
 
-ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
+    conserved_qn = QuantumDots.fermionnumber
+    d_tot = total_basis(sys_qd, res_qd, conserved_qn = conserved_qn)
+    d, d_main, dA_main, dB_main, d_res = d_tot
+    hamiltonian_type = Hdot_so_b
 
-## ------------ Save data ----------------
-sep_measurments_train, ent_measurments_train = charge_measurments(hamiltonian, ρ_R, t_eval, d, d_main, dA_main, dB_main, d_res, nbr_ent_states, nbr_sep_states, ent_state_types, noise_level_min, focknbrs)
-sep_measurments_test, ent_measurments_test = charge_measurments(hamiltonian, ρ_R, t_eval, d, d_main, dA_main, dB_main, d_res, nbr_ent_states, nbr_sep_states, ent_state_types, noise_level_min, focknbrs) 
+    hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=4)
 
-labels_train = vcat([-1 for i in 1:ent_measurments_train.size[1]], [1 for i in 1:sep_measurments_train.size[1]])
-measurments_train = vcat(hcat(ent_measurments_train), hcat(sep_measurments_train))
+    qn = 2
+    focknbrs = 2+qn
 
-labels_test = vcat([-1 for i in 1:ent_measurments_test.size[1]], [1 for i in 1:sep_measurments_test.size[1]])
-measurments_test = vcat(hcat(ent_measurments_test), hcat(sep_measurments_test))
+    ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
 
+    return hamiltonian, ρ_R, t_eval, d_tot, nbr_states, state_types, noise_level_min, focknbrs
+end
 
-np.save("Charge_EW/data/measurments_train.npy", measurments_train)
-np.save("Charge_EW/data/labels_train.npy", labels_train)
+function save_data()
+    ent_measurments_train, sep_measurments_train, mix_sep_measurments_train = get_charge_measurments(define_system_parameters()...)
+    ent_measurments_test, sep_measurments_test, mix_sep_measurments_test = get_charge_measurments(define_system_parameters()...)
+    
+    labels_train = vcat([-1 for i in 1:ent_measurments_train.size[1]], [1 for i in 1:sep_measurments_train.size[1]], [1 for i in 1:mix_sep_measurments_test.size[1]])
+    measurments_train = vcat(hcat(ent_measurments_train), hcat(sep_measurments_train), hcat(mix_sep_measurments_train))
+    
+    labels_test = vcat([-1 for i in 1:ent_measurments_test.size[1]], [1 for i in 1:sep_measurments_test.size[1]], [1 for i in 1:mix_sep_measurments_test.size[1]])
+    measurments_test = vcat(hcat(ent_measurments_test), hcat(sep_measurments_test), hcat(mix_sep_measurments_test))
+    
+    
+    np.save("Charge_EW/data/measurments_train.npy", measurments_train)
+    np.save("Charge_EW/data/labels_train.npy", labels_train)
+    
+    np.save("Charge_EW/data/measurments_test.npy", measurments_test)
+    np.save("Charge_EW/data/labels_test.npy", labels_test)
+end
 
-np.save("Charge_EW/data/measurments_test.npy", measurments_test)
-np.save("Charge_EW/data/labels_test.npy", labels_test)
+save_data()

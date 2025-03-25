@@ -80,8 +80,7 @@ function random_state(d :: FermionBasis)
     return v
 end
 
-function random_separable_mixed_state(d :: FermionBasis, dA :: FermionBasis, dB :: FermionBasis)
-    nbr_states = rand(1:10)
+function random_separable_mixed_state(d :: FermionBasis, dA :: FermionBasis, dB :: FermionBasis; nbr_states = 2)
     states = [random_separable_state(d, dA, dB) for i in 1:nbr_states]
     probs = rand(nbr_states)
     probs = probs / sum(probs)

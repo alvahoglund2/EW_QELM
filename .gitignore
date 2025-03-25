@@ -1,0 +1,5 @@
+# Ignore all .npy files
+*.npy
+
+# Ignore all in folder Workbook
+Workbook/*

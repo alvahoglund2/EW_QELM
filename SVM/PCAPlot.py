@@ -46,7 +46,6 @@ def pca_plot_two_classes(X, y):
     ax.scatter(X_pca[:, 0], X_pca[:, 1], X_pca[:, 2], 
                          c=colors, edgecolors='k')
 
-    # Add labels for the axes
     ax.set_xlabel('PC1')
     ax.set_ylabel('PC2')
     ax.set_zlabel('PC3')
@@ -61,30 +60,70 @@ def pca_plot_two_classes(X, y):
 
     plt.show()
 
-def plot_components_single_class(X, title=""):
-    X_plot = X[:, :3]
+def pca_plot_three_classes(X, y):
+    pca = PCA(n_components=3)
+    X_pca = pca.fit_transform(X)
+
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
 
-    ax.scatter(X_plot[:, 0], X_plot[:, 1], X_plot[:, 2], edgecolors='k')
+    colors = ['red' if label == -1 else 'blue' if label == 1 else 'green' for label in y]
 
-    ax.set_xlabel('<n_1>')
-    ax.set_ylabel('<n_2>')
-    ax.set_zlabel('<n_3>')
+    ax.scatter(X_pca[:, 0], X_pca[:, 1], X_pca[:, 2], 
+               c=colors, edgecolors='k')
 
+    ax.set_xlabel('PC1')
+    ax.set_ylabel('PC2')
+    ax.set_zlabel('PC3')
+
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Class 1'),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Class -1'),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Class 0'),
+    ]
+    ax.legend(handles=legend_elements, loc='best')
+
+    plt.title("PCA Projection of Three Classes")
     plt.show()
+
+def plot_components(X, y, title=""):
+
+    fig = plt.figure(figsize=(10, 8))
+    ax = fig.add_subplot(111, projection='3d')
+
+    colors = ['red' if label == -1 else 'blue' if label == 1 else 'green' for label in y]
+
+    ax.scatter(X[:, 0], X[:, 1], X[:, 2], 
+               c=colors, edgecolors='k')
+
+    ax.set_xlabel('measurement 1')
+    ax.set_ylabel('measurement 2')
+    ax.set_zlabel('measurement 3')
+
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=10, label='Class 1'),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Class -1'),
+        Line2D([0], [0], marker='o', color='w', markerfacecolor='green', markersize=10, label='Class 0'),
+    ]
+    ax.legend(handles=legend_elements, loc='best')
+
+    plt.title("PCA Projection of Three Classes")
+    plt.show()
+
 
 def main():
     X, y = load_data(
-        "Charge_Plots\data\measurments.npy", "Charge_Plots\data\labels.npy"
+        "Charge_EW\data\measurments_test.npy", "Charge_EW\data\labels_test.npy"
     )
     X_normalized, scaler= normalize_data(X)
 
-    pca_plot_single_class(X)
-    pca_plot_single_class(X_normalized)
+    #pca_plot_single_class(X)
+    #pca_plot_single_class(X_normalized)
 
-    plot_components_single_class(X_normalized)
-
+    plot_components(X,y)
+    pca_plot_three_classes(X, y)
 
 if __name__ == "__main__":
     main()
