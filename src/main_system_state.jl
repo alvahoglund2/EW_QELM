@@ -127,3 +127,28 @@ function uniform_separable_two_qubit_states(d :: FermionBasis, dA :: FermionBasi
     
     return ρ_list
 end
+
+function hilbert_schmidt_ensamble(d::FermionBasis)
+    """
+    Returns a random density matrix from the Hilbert-Schmidt ensemble
+    """
+    ind = get_qubit_idx(d)    
+    β = 2 # Type of Ginibre ensemble
+    N = length(ind) 
+    X = rand(Ginibre(β, N))
+    ρ_qb = X'X/tr(X'X)
+    dim = get_basis_dim(d)
+    ρ = spzeros(ComplexF64, dim, dim)
+    ρ[ind, ind] = ρ_qb
+    return ρ
+end
+
+function hs_separable_state(d :: FermionBasis, dA :: FermionBasis, dB :: FermionBasis)
+    """
+    Returns a random separable state from the Hilbert-Schmidt ensemble
+    """
+    ρ1 = hilbert_schmidt_ensamble(dA)
+    ρ2 = hilbert_schmidt_ensamble(dB)
+    ρ = wedge([ρ1, ρ2], [dA, dB], d)
+    ρ
+end
