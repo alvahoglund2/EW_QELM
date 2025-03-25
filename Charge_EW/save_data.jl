@@ -1,10 +1,10 @@
 includet("../src/basis.jl")
 includet("../src/hamiltonian.jl")
 includet("../src/time_evolution.jl")
-includet("../src/measurments.jl")
+includet("../src/measurements.jl")
 includet("../src/main_system_state.jl")
 includet("../src/reservoir_state.jl")
-includet("../src/effective_measurments.jl")
+includet("../src/effective_measurements.jl")
 includet("../src/generate_data.jl")
 ## -------------- Define System ----------------
 
@@ -42,20 +42,20 @@ function define_system_parameters()
 end
 
 function save_data()
-    ent_measurments_train, sep_measurments_train, mix_sep_measurments_train = get_charge_measurments(define_system_parameters()...)
-    ent_measurments_test, sep_measurments_test, mix_sep_measurments_test = get_charge_measurments(define_system_parameters()...)
+    ent_measurements_train, sep_measurements_train, mix_sep_measurements_train = get_charge_measurements(define_system_parameters()...)
+    ent_measurements_test, sep_measurements_test, mix_sep_measurements_test = get_charge_measurements(define_system_parameters()...)
     
-    labels_train = vcat([-1 for i in 1:ent_measurments_train.size[1]], [1 for i in 1:sep_measurments_train.size[1]], [1 for i in 1:mix_sep_measurments_test.size[1]])
-    measurments_train = vcat(hcat(ent_measurments_train), hcat(sep_measurments_train), hcat(mix_sep_measurments_train))
+    labels_train = vcat([-1 for i in 1:ent_measurements_train.size[1]], [1 for i in 1:sep_measurements_train.size[1]], [1 for i in 1:mix_sep_measurements_test.size[1]])
+    measurements_train = vcat(hcat(ent_measurements_train), hcat(sep_measurements_train), hcat(mix_sep_measurements_train))
     
-    labels_test = vcat([-1 for i in 1:ent_measurments_test.size[1]], [1 for i in 1:sep_measurments_test.size[1]], [1 for i in 1:mix_sep_measurments_test.size[1]])
-    measurments_test = vcat(hcat(ent_measurments_test), hcat(sep_measurments_test), hcat(mix_sep_measurments_test))
+    labels_test = vcat([-1 for i in 1:ent_measurements_test.size[1]], [1 for i in 1:sep_measurements_test.size[1]], [1 for i in 1:mix_sep_measurements_test.size[1]])
+    measurements_test = vcat(hcat(ent_measurements_test), hcat(sep_measurements_test), hcat(mix_sep_measurements_test))
     
     
-    np.save("Charge_EW/data/measurments_train.npy", measurments_train)
+    np.save("Charge_EW/data/measurements_train.npy", measurements_train)
     np.save("Charge_EW/data/labels_train.npy", labels_train)
     
-    np.save("Charge_EW/data/measurments_test.npy", measurments_test)
+    np.save("Charge_EW/data/measurements_test.npy", measurements_test)
     np.save("Charge_EW/data/labels_test.npy", labels_test)
 end
 

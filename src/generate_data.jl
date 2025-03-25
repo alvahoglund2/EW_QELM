@@ -1,4 +1,4 @@
-function get_charge_measurments(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatrix , t_eval, 
+function get_charge_measurements(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatrix , t_eval, 
     total_basis, nbr_states, state_types, p_min, fock_nbrs)
     """
         Generate the measurements for the entangled and separable states.
@@ -11,16 +11,16 @@ function get_charge_measurments(hamiltonian :: AbstractMatrix, ρ_R :: AbstractM
     ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
     sep_states = vcat([[sep_state_type(d_main, dA_main, dB_main) for i in 1:nbr_sep_states] for sep_state_type in sep_state_types]...)
     
-    eff_measurments = get_effective_measurments(hamiltonian, ρ_R, t_eval, d, d_main, d_res, fock_nbrs)
+    eff_measurements = get_effective_measurements(hamiltonian, ρ_R, t_eval, d, d_main, d_res, fock_nbrs)
 
-    ent_states_measurments = measure_states(ent_states, eff_measurments, d_main)
-    sep_states_measurments = measure_states(sep_states, eff_measurments, d_main)
-    mix_sep_states_measurments = get_mixed_measurements(sep_states_measurments, nbr_mixed_sep_states)
+    ent_states_measurements = measure_states(ent_states, eff_measurements, d_main)
+    sep_states_measurements = measure_states(sep_states, eff_measurements, d_main)
+    mix_sep_states_measurements = get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states)
 
-    return ent_states_measurments, sep_states_measurments, mix_sep_states_measurments
+    return ent_states_measurements, sep_states_measurements, mix_sep_states_measurements
 end
 
-function get_effective_measurments(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatrix , t_eval, 
+function get_effective_measurements(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatrix , t_eval, 
     d :: FermionBasis, d_main :: FermionBasis, d_res :: FermionBasis, fock_nbrs)
     """
         Generate the effective measurements corresponding to expectation value 
@@ -31,16 +31,16 @@ function get_effective_measurments(hamiltonian :: AbstractMatrix, ρ_R :: Abstra
     nbr_dots = length(dot_labels)
     
     ops = vcat([nbr_op(i, d) for i in 1:nbr_dots], [nbr2_op(i, d) for i in 1:nbr_dots])
-    eff_measurments = get_eff_measurments(ops, ρ_R, hamiltonian, t_eval, d, d_main, d_res, fock_nbrs)
-    return eff_measurments
+    eff_measurements = get_eff_measurements(ops, ρ_R, hamiltonian, t_eval, d, d_main, d_res, fock_nbrs)
+    return eff_measurements
 end
 
-function get_mixed_measurements(sep_states_measurments, nbr_mixed_sep_states)
+function get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states)
     """
-        Generate the measurements for the mixed separable states by linear combination of measurments of pure states. 
+        Generate the measurements for the mixed separable states by linear combination of measurements of pure states. 
         Start of by removing pure states that are not edge states.          
     """
-    data_batches = split_data(sep_states_measurments)
+    data_batches = split_data(sep_states_measurements)
     extreme_points = collect(vcat([get_extreme_points(batch) for batch in data_batches]...))
     nbr_mix_measurements2 = nbr_mixed_sep_states ÷ 2
     nbr_mix_measurements3 = nbr_mixed_sep_states - nbr_mix_measurements2

@@ -54,7 +54,7 @@ def plot_data(X, y, clf, title=""):
     ax.scatter(boundary_points[:, 0], boundary_points[:, 1], boundary_points[:, 2], 
             c='black', alpha=1, s=0.2, label='Decision Boundary')
 
-    # Plot the measurments
+    # Plot the measurements
     ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y, cmap=plt.cm.coolwarm, s=50, edgecolors='k')
 
     ax.set_xlim(x1_min, x1_max)
@@ -80,7 +80,7 @@ def print_accuracy(clf, X_train_scaled, y_train, X_test_scaled, y_test):
     print(f"Test Accuracy (Entangled States): {accuracy_ent}")
 
 def main():
-    X_train, y_train, X_test, y_test = load_data("Spin_EW\data\measurments_test.npy", "Spin_EW\data\labels_train.npy", "Spin_EW\data\measurments_train.npy", "Spin_EW\data\labels_test.npy")
+    X_train, y_train, X_test, y_test = load_data("Spin_EW\data\measurements_test.npy", "Spin_EW\data\labels_train.npy", "Spin_EW\data\measurements_train.npy", "Spin_EW\data\labels_test.npy")
     
     X_train_scaled, X_test_scaled = normalize_data(X_train, X_test)
     clf = train_svm(X_train_scaled, y_train)

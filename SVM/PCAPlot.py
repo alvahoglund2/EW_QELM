@@ -115,7 +115,7 @@ def plot_components(X, y, title=""):
 
 def main():
     X, y = load_data(
-        "Charge_EW\data\measurments_test.npy", "Charge_EW\data\labels_test.npy"
+        "Charge_EW\data\measurements_test.npy", "Charge_EW\data\labels_test.npy"
     )
     X_normalized, scaler= normalize_data(X)
 

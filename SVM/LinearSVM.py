@@ -85,7 +85,7 @@ def pca_plot(X_train_scaled, y_train, title=""):
     plt.show()
 
 
-def measurement_plot(X, y_train, measurements_idx, measurment_labels, title="", ):
+def measurement_plot(X, y_train, measurements_idx, measurement_labels, title="", ):
     
     fig = plt.figure(figsize=(10, 8))
     ax = fig.add_subplot(111, projection='3d')
@@ -95,9 +95,9 @@ def measurement_plot(X, y_train, measurements_idx, measurment_labels, title="", 
     ax.scatter(X[:, measurements_idx[0]], X[:, measurements_idx[1]], X[:, measurements_idx[2]], 
                          c=colors, edgecolors='k')
 
-    ax.set_xlabel(measurment_labels[0])
-    ax.set_ylabel(measurment_labels[1])
-    ax.set_zlabel(measurment_labels[2])
+    ax.set_xlabel(measurement_labels[0])
+    ax.set_ylabel(measurement_labels[1])
+    ax.set_zlabel(measurement_labels[2])
     ax.set_title(title)
 
     legend_elements = [
@@ -111,8 +111,8 @@ def measurement_plot(X, y_train, measurements_idx, measurment_labels, title="", 
 
 def main():
     X_train, y_train, X_test, y_test = load_data(
-        "Charge_EW\data\measurments_train.npy", "Charge_EW\data\labels_train.npy", 
-        "Charge_EW\data\measurments_test.npy", "Charge_EW\data\labels_test.npy")
+        "Charge_EW\data\measurements_train.npy", "Charge_EW\data\labels_train.npy", 
+        "Charge_EW\data\measurements_test.npy", "Charge_EW\data\labels_test.npy")
 
     X_train_scaled, X_test_scaled, scaler = normalize_data(X_train, X_test)
     clf = train_svm(X_train_scaled, y_train)

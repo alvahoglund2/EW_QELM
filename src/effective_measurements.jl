@@ -1,9 +1,9 @@
-function get_eff_measurment(measurment_op :: AbstractMatrix, ρ_r :: AbstractMatrix,
+function get_eff_measurement(measurement_op :: AbstractMatrix, ρ_r :: AbstractMatrix,
     hamiltonian :: AbstractMatrix, t_ev, 
     d :: FermionBasis, d_main :: FermionBasis, d_res :: FermionBasis; 
     truncate_density_matrix :: Bool = true,) 
 
-    op_ev = operator_evolution(measurment_op, t_ev, hamiltonian)
+    op_ev = operator_evolution(measurement_op, t_ev, hamiltonian)
 
     exp_value(ρ_I) = tr(wedge([sparse(ρ_I), ρ_r], [d_main, d_res], d)*op_ev)
 
@@ -32,13 +32,13 @@ function get_eff_measurment(measurment_op :: AbstractMatrix, ρ_r :: AbstractMat
 end
 
 
-function get_eff_measurment(op_ev :: AbstractMatrix, ρ_r :: AbstractMatrix,
+function get_eff_measurement(op_ev :: AbstractMatrix, ρ_r :: AbstractMatrix,
     d :: FermionBasis, d_main :: FermionBasis, d_res :: FermionBasis; )
     """
-        get_eff_measurment(op_ev :: AbstractMatrix, ρ_r :: AbstractMatrix,
+        get_eff_measurement(op_ev :: AbstractMatrix, ρ_r :: AbstractMatrix,
         d :: FermionBasis, d_main :: FermionBasis, d_res :: FermionBasis; )
 
-    Returns the effective measurement for the given evolved measurment operator.
+    Returns the effective measurement for the given evolved measurement operator.
     """
     exp_value(ρ_I) = tr(wedge([sparse(ρ_I), ρ_r], [d_main, d_res], d)*op_ev)
 
@@ -55,25 +55,25 @@ function get_eff_measurment(op_ev :: AbstractMatrix, ρ_r :: AbstractMatrix,
 
 end
 
-function get_eff_measurments(measurment_ops, ρ_r :: AbstractMatrix,
+function get_eff_measurements(measurement_ops, ρ_r :: AbstractMatrix,
     hamiltonian :: AbstractMatrix, t_eval, 
     d :: FermionBasis, d_main :: FermionBasis, d_res :: FermionBasis, 
     focknbrs)
     """
-        get_eff_measurments(measurment_ops, ρ_r :: AbstractMatrix,
+        get_eff_measurements(measurement_ops, ρ_r :: AbstractMatrix,
         hamiltonian :: AbstractMatrix, t_ev, 
         d :: FermionBasis, d_main :: FermionBasis, d_res :: FermionBasis; 
         focknbrs)
 
-    Returns the effective measurements for the given measurment operators 
+    Returns the effective measurements for the given measurement operators 
     and specified focknbrs.
     """
     u_block = get_propagator_block(t_eval, hamiltonian, d, focknbrs)
-    eff_measurments = []
-    for op in measurment_ops
+    eff_measurements = []
+    for op in measurement_ops
         op_ev = operator_evolution_blocks(op, u_block, d, focknbrs)
-        push!(eff_measurments, get_eff_measurment(op_ev, ρ_r, d, d_main, d_res))
+        push!(eff_measurements, get_eff_measurement(op_ev, ρ_r, d, d_main, d_res))
     end
-    return eff_measurments
+    return eff_measurements
 
 end

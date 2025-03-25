@@ -74,8 +74,8 @@ def pca_visualization(X_train_scaled, y_train):
 
 def main():
     X_train, y_train, X_test, y_test = load_data(
-        "Charge_EW\data\measurments_train.npy", "Charge_EW\data\labels_train.npy", 
-        "Charge_EW\data\measurments_test.npy", "Charge_EW\data\labels_test.npy")
+        "Charge_EW\data\measurements_train.npy", "Charge_EW\data\labels_train.npy", 
+        "Charge_EW\data\measurements_test.npy", "Charge_EW\data\labels_test.npy")
 
     X_train_scaled, X_test_scaled = normalize_data(X_train, X_test)
     clf = train_svm(X_train_scaled, y_train)

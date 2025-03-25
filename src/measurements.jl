@@ -42,14 +42,14 @@ function process_complex(value, tolerance=1e-3)
     return real(value)
 end
 
-function measure_states(state_list, eff_measurments, d_main :: FermionBasis)
+function measure_states(state_list, eff_measurements, d_main :: FermionBasis)
     n_states = length(state_list)
-    n_measurements = length(eff_measurments)
+    n_measurements = length(eff_measurements)
     result = zeros(n_states, n_measurements)
     for (i, state) in enumerate(state_list)
-        for (j, eff_measurment) in enumerate(eff_measurments)
+        for (j, eff_measurement) in enumerate(eff_measurements)
             trunc_state = state[get_qubit_idx(d_main),get_qubit_idx(d_main)]
-            result[i, j] = expectation_value(trunc_state, eff_measurment)
+            result[i, j] = expectation_value(trunc_state, eff_measurement)
         end
     end    
     return result

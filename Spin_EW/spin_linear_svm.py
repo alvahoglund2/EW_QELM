@@ -64,7 +64,7 @@ def plot_data(X, y, w, b, title = ""):
 
     ax.plot_surface(x1, x2, x3, color='lightblue', alpha=0.5, edgecolor='k', label='Decision Boundary')
 
-    # Plot the measurments
+    # Plot the measurements
     ax.scatter(X[:, 0], X[:, 1], X[:, 2], c=y, cmap=plt.cm.coolwarm_r, s=50, edgecolors='k', marker = 'o')
 
 
@@ -87,7 +87,7 @@ def plot_data(X, y, w, b, title = ""):
     plt.show()
 
 def main():
-    X_train, y_train, X_test, y_test = load_data("Spin_EW\data\measurments_test.npy", "Spin_EW\data\labels_train.npy", "Spin_EW\data\measurments_train.npy", "Spin_EW\data\labels_test.npy")
+    X_train, y_train, X_test, y_test = load_data("Spin_EW\data\measurements_test.npy", "Spin_EW\data\labels_train.npy", "Spin_EW\data\measurements_train.npy", "Spin_EW\data\labels_test.npy")
     
     X_train_scaled, X_test_scaled, scaler = normalize_data(X_train, X_test)
 
