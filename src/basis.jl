@@ -53,22 +53,33 @@ function get_basis_dim(d :: FermionBasis)
     return 2^length(keys(d))
 end
 
-function get_qubit_idx(d_main :: FermionBasis)
-    """
-    Return indices where there is one electron per QD
-    """
-    site_labels = get_spatial_labels(d_main)
-    v0 = vac_state(d_main) 
-    spins = (:↑, :↓) 
-    spin_configs = Iterators.product([spins for _ in site_labels]...)
-    state_indices = Int[]
 
-    for config in spin_configs
-        state = v0
-        for (site, spin) in zip(site_labels, config) 
-            state = d_main[site, spin]' * state 
-        end
-        push!(state_indices, findall(!iszero, state)[1])
+function get_qubit_idx(d_main :: FermionBasis)
+    nbr_dots = length(get_spatial_labels(d_main))
+
+    if nbr_dots == 1
+        get_single_qubit_idx(d_main)
+    elseif nbr_dots == 2
+        return get_two_qubit_idx(d_main)
+    else
+        throw(ArgumentError("Only implemented for 1 or 2 dots"))
     end
-    return sort!(state_indices)
 end
+
+function get_single_qubit_idx(d_main :: FermionBasis)
+    v0 = vac_state(d_main)
+    u_idx = findall(!iszero, d_main[1, :↑]'*v0)[1]
+    d_idx = findall(!iszero, d_main[1, :↓]'*v0)[1]
+    return sort!([u_idx, d_idx])
+end
+
+function get_two_qubit_idx(d_main :: FermionBasis)
+    v0 = vac_state(d_main)
+    uu_idx =findall(!iszero, d_main[1, :↑]'d_main[2, :↑]'*v0)[1]
+    ud_idx =findall(!iszero, d_main[1, :↑]'d_main[2, :↓]'*v0)[1]
+    du_idx =findall(!iszero, d_main[1, :↓]'d_main[2, :↑]'*v0)[1]
+    dd_idx =findall(!iszero, d_main[1, :↓]'d_main[2, :↓]'*v0)[1]
+    return sort!([uu_idx, ud_idx, du_idx, dd_idx])
+end
+
+@time get_qubit_idx(d_main_test)

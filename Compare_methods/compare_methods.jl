@@ -48,7 +48,8 @@ function measure_states(state_list, eff_measurements, d_main)
     result = zeros(n_states, n_measurements)
     for (i, state) in enumerate(state_list)
         for (j, eff_measurement) in enumerate(eff_measurements)
-            trunc_state = state[get_qubit_idx(d_main),get_qubit_idx(d_main)]
+            idx = get_qubit_idx(d_main)
+            trunc_state = state[idx,idx]
             result[i, j] = expectation_value(trunc_state, eff_measurement)
         end
     end    
@@ -65,7 +66,8 @@ measurements_heisenberg = measure_states(states_tot, evolved_ops)
 
 ## ------------ Effective measurements ----------------
 eff_measurements = [get_eff_measurement(op, ρ_R, hamiltonian, t_eval, d, d_main, d_res) for op in ops]
-states_trunc = [state[get_qubit_idx(d_main),get_qubit_idx(d_main)] for state in states]
+idx = get_qubit_idx(d_main)
+states_trunc = [state[idx, idx] for state in states]
 measurements_effective = measure_states(states_trunc, eff_measurements)
 
 ## ------------ Evolve only specified sector ----------------
