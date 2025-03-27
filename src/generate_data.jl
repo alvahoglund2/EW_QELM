@@ -2,11 +2,13 @@ function get_charge_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstract
     total_basis, nbr_states, state_types, p_min, fock_nbrs)
     """
         Generate the measurements for the entangled and separable states.
+        
     """
 
     d, d_main, dA_main, dB_main, d_res = total_basis
     nbr_ent_states, nbr_sep_states, nbr_mixed_sep_states = nbr_states
     ent_state_types, sep_state_types = state_types
+    nbr_res_dots = length(get_spatial_labels(d_res))
 
     ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
     sep_states = vcat([[sep_state_type(d_main, dA_main, dB_main) for i in 1:nbr_sep_states] for sep_state_type in sep_state_types]...)
@@ -15,8 +17,10 @@ function get_charge_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstract
 
     ent_states_measurements = measure_states(ent_states, eff_measurements, d_main)
     sep_states_measurements = measure_states(sep_states, eff_measurements, d_main)
-    mix_sep_states_measurements = get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states)
 
+    convex_hull = nbr_res_dots <= 2
+    mix_sep_states_measurements = get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states, convex_hull)
+    
     return ent_states_measurements, sep_states_measurements, mix_sep_states_measurements
 end
 
@@ -35,13 +39,18 @@ function get_effective_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstr
     return eff_measurements
 end
 
-function get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states)
+function get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states, convex_hull)
     """
         Generate the measurements for the mixed separable states by linear combination of measurements of pure states. 
-        Start of by removing pure states that are not edge states.          
+        Start of by removing pure states that are not edge states if convex_hull = True     
     """
-    data_batches = split_data(sep_states_measurements)
-    extreme_points = collect(vcat([get_extreme_points(batch) for batch in data_batches]...))
+    extreme_points = nothing
+    if convex_hull
+        data_batches = split_data(sep_states_measurements)
+        extreme_points = collect(vcat([get_extreme_points(batch) for batch in data_batches]...))
+    else 
+        extreme_points = sep_states_measurements
+    end
     nbr_mix_measurements2 = nbr_mixed_sep_states ÷ 2
     nbr_mix_measurements3 = nbr_mixed_sep_states - nbr_mix_measurements2
     mix_measurements2 = get_mixed_measurement(extreme_points, 2, nbr_mix_measurements2)
@@ -81,7 +90,7 @@ function split_data(data)
     Split the data into batches of 1000 points.
     """
     nbr_points = size(data, 1)
-    batch_size = 1000
+    batch_size = 500
     points_batches = [data[i:min(i + batch_size - 1, nbr_points), :] for i in 1:batch_size:nbr_points]
     return points_batches
 end
