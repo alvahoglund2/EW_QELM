@@ -18,7 +18,7 @@ function get_charge_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstract
     ent_states_measurements = measure_states(ent_states, eff_measurements, d_main)
     sep_states_measurements = measure_states(sep_states, eff_measurements, d_main)
 
-    convex_hull = nbr_res_dots <= 2
+    convex_hull = nbr_res_dots <= 1
     mix_sep_states_measurements = get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states, convex_hull)
     
     return ent_states_measurements, sep_states_measurements, mix_sep_states_measurements
@@ -90,7 +90,7 @@ function split_data(data)
     Split the data into batches of 1000 points.
     """
     nbr_points = size(data, 1)
-    batch_size = 500
+    batch_size = 1000
     points_batches = [data[i:min(i + batch_size - 1, nbr_points), :] for i in 1:batch_size:nbr_points]
     return points_batches
 end
