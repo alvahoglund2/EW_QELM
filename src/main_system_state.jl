@@ -44,9 +44,11 @@ function werner_state(d :: FermionBasis, p :: AbstractFloat, target_state :: Fun
     return ρ_w
 end
 
-werner_state_list(d :: FermionBasis, size :: Integer, target_state :: Function, p_min :: AbstractFloat) = 
-    [werner_state(d, p_min + (1 - p_min) * rand(), target_state) for i in 1:size]
-
+function werner_state_list(d :: FermionBasis, size :: Integer, target_state :: Function, p_min :: AbstractFloat)
+    p = range(p_min, 1, length=size)
+    ρ_list = [werner_state(d, p[i], target_state) for i in 1:size]
+    return ρ_list
+end
 
 function max_mixed_state(d :: FermionBasis)
     v0 = vac_state(d)
