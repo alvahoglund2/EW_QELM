@@ -14,12 +14,10 @@ function define_system_parameters()
     #------- State parameters -------
     # State types
     ent_state_types = [triplet0_state]
-    sep_state_types = [random_separable_state]
-    state_types = [ent_state_types, sep_state_types]
 
     #Nuber of states
     nbr_sep_states = 10000
-    nbr_mix_sep_states = 200000
+    nbr_mix_sep_states = 300000
     nbr_ent_states = nbr_sep_states+ nbr_mix_sep_states
     nbr_states = [nbr_ent_states, nbr_sep_states, nbr_mix_sep_states]
 
@@ -35,19 +33,20 @@ function define_system_parameters()
     conserved_qn = QuantumDots.fermionnumber
     hamiltonian_type = Hdot_so_b
 
+
     # System basis
     d_tot = total_basis(2, res_qd, conserved_qn = conserved_qn)
     d, d_main, dA_main, dB_main, d_res = d_tot
 
     # Hamiltonian
-    hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=4)
+    hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=140)
     
     # Reservoir state
     res_qn = 1
     focknbrs = 2+res_qn
     ρ_R = res_ground_state(hamiltonian, d, d_res, res_qn)
 
-    return hamiltonian, ρ_R, t_eval, d_tot, nbr_states, state_types, noise_level_min, focknbrs
+    return hamiltonian, ρ_R, t_eval, d_tot, nbr_states, ent_state_types, noise_level_min, focknbrs
 end
 
 function get_data()
@@ -78,3 +77,5 @@ end
 ent_measurements, sep_measurements, mix_sep_measurements = get_data()
 all_measurements = vcat(ent_measurements, sep_measurements, mix_sep_measurements)
 pca_plot(all_measurements, ent_measurements, sep_measurements, mix_sep_measurements)
+
+

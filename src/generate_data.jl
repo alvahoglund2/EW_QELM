@@ -1,5 +1,5 @@
 function get_charge_measurements(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatrix , t_eval, 
-    total_basis, nbr_states, state_types, p_min, fock_nbrs)
+    total_basis, nbr_states, ent_state_types, p_min, fock_nbrs)
     """
         Generate the measurements for the entangled and separable states.
         
@@ -7,20 +7,16 @@ function get_charge_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstract
 
     d, d_main, dA_main, dB_main, d_res = total_basis
     nbr_ent_states, nbr_sep_states, nbr_mixed_sep_states = nbr_states
-    ent_state_types, sep_state_types = state_types
-    nbr_res_dots = length(get_spatial_labels(d_res))
 
-    ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
-    sep_states = vcat([[sep_state_type(d_main, dA_main, dB_main) for i in 1:nbr_sep_states] for sep_state_type in sep_state_types]...)
-    
+    ent_states = generate_werner_states(total_basis, nbr_ent_states, ent_state_types, p_min)
+    sep_states, mix_sep_states = generate_sep_states(total_basis, nbr_sep_states, nbr_mixed_sep_states)
+
     eff_measurements = get_effective_measurements(hamiltonian, ρ_R, t_eval, d, d_main, d_res, fock_nbrs)
 
     ent_states_measurements = measure_states(ent_states, eff_measurements, d_main)
     sep_states_measurements = measure_states(sep_states, eff_measurements, d_main)
+    mix_sep_states_measurements = measure_states(mix_sep_states, eff_measurements, d_main)
 
-    convex_hull = nbr_res_dots <= 1
-    mix_sep_states_measurements = get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states, convex_hull)
-    
     return ent_states_measurements, sep_states_measurements, mix_sep_states_measurements
 end
 
@@ -38,6 +34,58 @@ function get_effective_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstr
     eff_measurements = get_eff_measurements(ops, ρ_R, hamiltonian, t_eval, d, d_main, d_res, fock_nbrs)
     return eff_measurements
 end
+
+function generate_sep_states(total_basis, nbr_sep_states, nbr_mixed_sep_states)
+    d, d_main, dA_main, dB_main, d_res = total_basis
+    sep_states = [random_separable_state(d_main, dA_main, dB_main) for i in 1:nbr_sep_states]
+    mixed_states_2 = [random_separable_mixed_state(d_main, dA_main, dB_main, nbr_mixed_states = 2) for i in 1:(nbr_mixed_sep_states ÷ 2)]
+    mixed_states_3 = [random_separable_mixed_state(d_main, dA_main, dB_main, nbr_mixed_states = 3) for i in 1:(nbr_mixed_sep_states ÷ 2)]
+    mixed_states = vcat(mixed_states_2, mixed_states_3)
+    return sep_states, mixed_states
+end
+
+function generate_werner_states(total_basis, nbr_ent_states, ent_state_types, p_min)
+    d, d_main, dA_main, dB_main, d_res = total_basis
+    ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
+    return ent_states
+end
+
+## ---------------- Alternative way to generate mixed states with convex hull approach ------------------
+
+function get_charge_measurements_convex_hull(hamiltonian :: AbstractMatrix, ρ_R :: AbstractMatrix , t_eval, 
+    total_basis, nbr_states, ent_state_types, p_min, fock_nbrs)
+    """
+        Generate the measurements for the entangled and separable states.
+        
+    """
+    d, d_main, dA_main, dB_main, d_res = total_basis
+    nbr_ent_states, nbr_sep_states, nbr_mixed_sep_states = nbr_states
+    nbr_res_dots = length(get_spatial_labels(d_res))
+
+    ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
+    sep_states = [random_separable_state(d_main, dA_main, dB_main) for i in 1:nbr_sep_states]
+    
+    eff_measurements = get_effective_measurements(hamiltonian, ρ_R, t_eval, d, d_main, d_res, fock_nbrs)
+
+    ent_states_measurements = measure_states(ent_states, eff_measurements, d_main)
+    sep_states_measurements = measure_states(sep_states, eff_measurements, d_main)
+
+    convex_hull = nbr_res_dots <= 1
+    mix_sep_states_measurements = get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states, convex_hull)
+    
+    return ent_states_measurements, sep_states_measurements, mix_sep_states_measurements
+end
+
+function split_data(data)
+    """
+    Split the data into batches of 1000 points.
+    """
+    nbr_points = size(data, 1)
+    batch_size = 1000
+    points_batches = [data[i:min(i + batch_size - 1, nbr_points), :] for i in 1:batch_size:nbr_points]
+    return points_batches
+end
+
 
 function get_mixed_measurements(sep_states_measurements, nbr_mixed_sep_states, convex_hull)
     """
@@ -83,14 +131,4 @@ function get_extreme_points(data)
     p = polyhedron(v, CDDLib.Library())
     removevredundancy!(p)
     return reduce(hcat, points(p))'
-end
-
-function split_data(data)
-    """
-    Split the data into batches of 1000 points.
-    """
-    nbr_points = size(data, 1)
-    batch_size = 1000
-    points_batches = [data[i:min(i + batch_size - 1, nbr_points), :] for i in 1:batch_size:nbr_points]
-    return points_batches
 end
