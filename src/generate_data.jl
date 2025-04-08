@@ -8,8 +8,8 @@ function get_charge_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstract
     d, d_main, dA_main, dB_main, d_res = total_basis
     nbr_ent_states, nbr_sep_states, nbr_mixed_sep_states = nbr_states
 
-    ent_states = generate_werner_states(total_basis, nbr_ent_states, ent_state_types, p_min)
-    sep_states, mix_sep_states = generate_sep_states(total_basis, nbr_sep_states, nbr_mixed_sep_states)
+    ent_states = generate_werner_states(d_main, nbr_ent_states, ent_state_types, p_min)
+    sep_states, mix_sep_states = generate_sep_states(d_main, dA_main, dB_main, nbr_sep_states, nbr_mixed_sep_states)
 
     eff_measurements = get_effective_measurements(hamiltonian, ρ_R, t_eval, d, d_main, d_res, fock_nbrs)
 
@@ -35,18 +35,52 @@ function get_effective_measurements(hamiltonian :: AbstractMatrix, ρ_R :: Abstr
     return eff_measurements
 end
 
-function generate_sep_states(total_basis, nbr_sep_states, nbr_mixed_sep_states)
-    d, d_main, dA_main, dB_main, d_res = total_basis
-    sep_states = [random_separable_state(d_main, dA_main, dB_main) for i in 1:nbr_sep_states]
-    mixed_states_2 = [random_separable_mixed_state(d_main, dA_main, dB_main, nbr_mixed_states = 2) for i in 1:(nbr_mixed_sep_states ÷ 2)]
-    mixed_states_3 = [random_separable_mixed_state(d_main, dA_main, dB_main, nbr_mixed_states = 3) for i in 1:(nbr_mixed_sep_states ÷ 2)]
+function get_spin_measurements(d_main, dA_main, dB_main, nbr_states, ent_state_types, p_min, )
+    """
+        Generate the effective measurements corresponding to expectation value 
+        of one and two particles on each dot.
+    """
+    nbr_ent_states, nbr_sep_states, nbr_mixed_sep_states, nbr_werner_states = nbr_states
+
+    ent_states = generate_werner_states(d_main, nbr_ent_states, ent_state_types, p_min)
+    sep_states, mix_sep_states = generate_sep_states(d_main, dA_main, dB_main, nbr_sep_states, nbr_mixed_sep_states)
+    werner_states = generate_werner_states(d_main, nbr_werner_states, ent_state_types, 0.0)
+
+    spin_measurements = get_spin_operators(d_main, dA_main, dB_main)
+
+    ent_states_measurements = measure_states(ent_states, spin_measurements, d_main)
+    sep_states_measurements = measure_states(sep_states, spin_measurements, d_main)
+    mix_sep_states_measurements = measure_states(mix_sep_states, spin_measurements, d_main)
+    werner_states_measurements = measure_states(werner_states, spin_measurements, d_main)
+
+    return ent_states_measurements, sep_states_measurements, mix_sep_states_measurements, werner_states_measurements
+end
+
+
+function get_spin_operators(d_main, dA_main, dB_main)
+    """
+        Generate the spin operators for the main system.
+    """
+    idx = get_qubit_idx(d_main)
+    sxx = pauli_string(d_main, dA_main, dB_main, sx, sx)[idx,idx]
+    syy = pauli_string(d_main, dA_main, dB_main, sy, sy)[idx, idx]
+    szz = pauli_string(d_main, dA_main, dB_main, sz, sz)[idx, idx]
+    return [sxx, syy, szz]
+end
+
+function generate_sep_states(d_main, dA_main, dB_main, nbr_sep_states, nbr_mixed_sep_states)
+    sep_states_rand = [Matrix(random_separable_state(d_main, dA_main, dB_main)) for i in 1:nbr_sep_states÷2]
+    sep_states_werner = sep_werner_state_list(d_main, nbr_sep_states÷2,  target_states = [singlet_state, triplet0_state, tripletn1_state, tripletp1_state], sparse = false)
+    sep_states = vcat(sep_states_rand, sep_states_werner)
+    mixed_states_2 = [Matrix(random_separable_mixed_state(d_main, dA_main, dB_main, nbr_mixed_states = 2)) for i in 1:(nbr_mixed_sep_states ÷ 2)]
+    mixed_states_3 = [Matrix(random_separable_mixed_state(d_main, dA_main, dB_main, nbr_mixed_states = 3)) for i in 1:(nbr_mixed_sep_states ÷ 2)]
     mixed_states = vcat(mixed_states_2, mixed_states_3)
     return sep_states, mixed_states
 end
 
-function generate_werner_states(total_basis, nbr_ent_states, ent_state_types, p_min)
-    d, d_main, dA_main, dB_main, d_res = total_basis
-    ent_states = vcat([werner_state_list(d_main, nbr_ent_states, type, p_min) for type in ent_state_types]...)
+function generate_werner_states(d_main, nbr_ent_states, ent_state_types, p_min)
+    nbr_states_per_type = nbr_ent_states ÷ length(ent_state_types)
+    ent_states = vcat([werner_state_list(d_main, nbr_states_per_type, ent_state_type, p_min, sparse=false) for ent_state_type in ent_state_types]...)
     return ent_states
 end
 

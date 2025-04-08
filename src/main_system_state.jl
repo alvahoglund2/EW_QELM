@@ -44,9 +44,27 @@ function werner_state(d :: FermionBasis, p :: AbstractFloat, target_state :: Fun
     return ρ_w
 end
 
-function werner_state_list(d :: FermionBasis, size :: Integer, target_state :: Function, p_min :: AbstractFloat)
-    p = range(p_min, 1, length=size)
-    ρ_list = [werner_state(d, p[i], target_state) for i in 1:size]
+function werner_state_list(d :: FermionBasis, size :: Integer, target_state :: Function, p_min :: AbstractFloat; p_max = 1.0, sparse = true)
+    p = range(p_min, p_max, length=size)
+    ρ_list = nothing
+    if sparse
+        ρ_list = [werner_state(d, p[i], target_state) for i in 1:size]
+    else
+        ρ_list = [Matrix(werner_state(d, p[i], target_state)) for i in 1:size]
+    end
+    return ρ_list
+end
+
+function sep_werner_state_list(d :: FermionBasis, size :: Integer; target_states = [singlet_state, triplet0_state, tripletn1_state, tripletp1_state], sparse = true)
+    ρ_list = []
+    p_min = 0.0
+    p_max = 1/3
+
+    # Floor division of sizes with length of target_states. Wnat an integer as result
+    sizes = size ÷ length(target_states)
+
+    ρ_list = vcat([werner_state_list(d, sizes, target_state, p_min, p_max = p_max, sparse=sparse) for target_state in target_states]...)
+    
     return ρ_list
 end
 
@@ -82,11 +100,11 @@ function random_state(d :: FermionBasis)
     return v
 end
 
-function random_separable_mixed_state(d :: FermionBasis, dA :: FermionBasis, dB :: FermionBasis; nbr_states = 2)
-    states = [random_separable_state(d, dA, dB) for i in 1:nbr_states]
-    probs = rand(nbr_states)
+function random_separable_mixed_state(d :: FermionBasis, dA :: FermionBasis, dB :: FermionBasis; nbr_mixed_states = 2)
+    states = [random_separable_state(d, dA, dB) for i in 1:nbr_mixed_states]
+    probs = rand(nbr_mixed_states)
     probs = probs / sum(probs)
-    total_state = sum([probs[i]*states[i] for i in 1:nbr_states])
+    total_state = sum([probs[i]*states[i] for i in 1:nbr_mixed_states])
     return total_state
 end
 
