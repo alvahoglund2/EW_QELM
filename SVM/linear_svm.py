@@ -11,11 +11,13 @@ class linear_svm:
                  X_train_path,
                  y_train_path,
                  X_test_path,
-                 y_test_path):
+                 y_test_path,
+                 class_weights={-1: 1, 1: 1000},
+                 C = 1):
         
         self.X_train, self.y_train, self.X_test, self.y_test = self.load_data(X_train_path, y_train_path, X_test_path, y_test_path)
         self.X_train_normalized, self.X_test_normalized, self.scaler = self.normalize_data(self.X_train, self.X_test)
-        self.clf = self.train_svm()
+        self.clf = self.train_svm(class_weights, C)
 
     def load_data(self, train_data_path, train_labels_path, test_data_path, test_labels_path):
         train_measurements = np.load(train_data_path).real
@@ -30,8 +32,8 @@ class linear_svm:
         X_test_normalized = scaler.transform(X_test)
         return X_train_normalized, X_test_normalized, scaler
 
-    def train_svm(self, C_value=1):
-        clf = LinearSVC(penalty='l2', class_weight={-1: 1, 1: 10000}, C=C_value)
+    def train_svm(self, class_weights, C):
+        clf = LinearSVC(penalty='l2', class_weight=class_weights, C = C)
         clf.fit(self.X_train_normalized, self.y_train)
         return clf
 
@@ -48,6 +50,40 @@ class linear_svm:
         accuracy_sep = np.mean(y_pred[y == 1] == 1)
         accuracy_ent = np.mean(y_pred[y == -1] == -1)
         return accuracy, accuracy_sep, accuracy_ent, y_pred
+
+    def get_decision_values(self, evaluate_train):
+        # Get all X where y is -1 
+        X_ent = 0
+        if evaluate_train:
+            X_ent = self.X_train_normalized[self.y_train == -1]
+        else:
+            X_ent = self.X_test_normalized[self.y_test == -1]
+
+        y_pred = self.clf.decision_function(X_ent)
+        zero_idx = np.argmin(np.abs(y_pred))
+        p_min = 1/2
+        p_range = np.linspace(p_min, 1, X_ent.shape[0])
+
+        return p_range, y_pred
+    
+    def get_desicion_values_for_data(self, X_path):
+        X = np.load(X_path)
+        X_normalized = self.scaler.transform(X)
+        y_pred = self.clf.decision_function(X_normalized)
+        zero_idx = np.argmin(np.abs(y_pred))
+        return y_pred, zero_idx
+    
+    def get_robustness(self, evaluate_train, p_min):
+        X_ent = 0
+        if evaluate_train:
+            X_ent = self.X_train_normalized[self.y_train == -1]
+        else:
+            X_ent = self.X_test_normalized[self.y_test == -1]
+        y_pred = self.clf.decision_function(X_ent)
+        zero_idx = np.argmin(np.abs(y_pred))
+        p_min = 1/2
+        p_range = np.linspace(p_min, 1, X_ent.shape[0])
+        return p_range[zero_idx]
 
     def get_weights(self):
         """
@@ -134,3 +170,64 @@ class linear_svm:
         ax.legend(handles=legend_elements, loc='best')
 
         plt.show()
+
+    def plot_spin_decision_boundary(self):
+        fig = plt.figure()
+        ax = fig.add_subplot(111, projection='3d')
+
+        x1_min, x1_max = self.X_test[:, 0].min() - 1, self.X_test[:, 0].max() + 1
+        x2_min, x2_max = self.X_test[:, 1].min() - 1, self.X_test[:, 1].max() + 1
+        x1, x2 = np.meshgrid(np.linspace(x1_min, x1_max, 50), np.linspace(x2_min, x2_max, 50))
+
+        w, b = self.get_original_weights()
+
+        #Plot the decision boundary
+        if w[2] != 0:
+            x3 = -(w[0] * x1 + w[1] * x2 + b) / w[2]
+        else:
+            raise ValueError("The weight corresponding to the third feature is zero, so the decision boundary cannot be plotted as a plane.")
+
+        ax.plot_surface(x1, x2, x3, color='lightblue', alpha=0.2, edgecolor='k', label='Decision Boundary')
+
+        # Plot the measurements
+        frac = 10
+        label_to_index = {label: i for i, label in enumerate(np.unique(self.y_test))}
+        indices = np.array([label_to_index[label] for label in self.y_test[::frac]])
+
+        colors = np.array([palette[0], palette[2]])
+        point_colors = colors[indices]
+
+        ax.scatter(self.X_test[::frac, 0], self.X_test[::frac, 1], self.X_test[::frac, 2], 
+                c=point_colors, s=50, edgecolors='k', marker='o')
+
+        class_1_label = 'Separable States'
+        class_2_label = 'Entangled States'
+        handle_class_1 = Line2D([0], [0], marker='o', color='w', markerfacecolor=palette[0], markersize=10, label=class_1_label)
+        handle_class_2 = Line2D([0], [0], marker='o', color='w', markerfacecolor=palette[2], markersize=10, label=class_2_label)
+        ax.legend(handles=[handle_class_1, handle_class_2], loc='best')
+
+
+        ax.set_xlim(-2, 2)
+        ax.set_ylim(-2, 2)
+        ax.set_zlim(-2, 2)
+
+        ax.set_xlabel(r"X $\otimes$ X")
+        ax.set_ylabel(r"Y $\otimes$ Y")
+        ax.set_zlabel(r"Z $\otimes$ Z")
+        ax.set_xticks(np.arange(-2, 3, 1))
+        ax.set_yticks(np.arange(-2, 3, 1))
+        ax.set_zticks(np.arange(-2, 3, 1))
+
+        plt.tight_layout()
+        plt.show()
+
+
+
+
+palette = [
+    (100/255, 143/255, 255/255),  # Blue 
+    (120/255, 94/255, 240/255),  # Purple
+    (220/255, 38/255, 127/255),  # Pink
+    (254/255, 97/255, 0/255),    # Red-Orange
+    (255/255, 176/255, 0/255),   # Orange
+]

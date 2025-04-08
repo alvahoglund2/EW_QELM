@@ -6,7 +6,7 @@ from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
 
-class rbf_svm:
+class poly_svm:
     def __init__(self,
                  X_train_path,
                  y_train_path,
@@ -14,14 +14,14 @@ class rbf_svm:
                  y_test_path,
                  class_weights={-1: 1, 1: 1000},
                  C = 1,
-                 gamma = 0):
+                 degree = 3):
         
         print("Loading data...")
         self.X_train, self.y_train, self.X_test, self.y_test = self.load_data(X_train_path, y_train_path, X_test_path, y_test_path)
         print("Normalizing data...")
         self.X_train_normalized, self.X_test_normalized, self.scaler = self.normalize_data()
         print("Training SVM...")
-        self.clf = self.train_svm(class_weights, C, gamma)
+        self.clf = self.train_svm(class_weights, C, degree)
 
 
     def load_data(self, X_train_path, y_train_path, X_test_path, y_test_path):
@@ -37,12 +37,8 @@ class rbf_svm:
         X_test_normalized = scaler.transform(self.X_test)
         return X_train_normalized, X_test_normalized, scaler
 
-    def train_svm(self, class_weights, C, gamma):
-        clf = None
-        if gamma == 0:
-            clf = svm.SVC(kernel='rbf', class_weight=class_weights, C = C)
-        else:
-            clf = svm.SVC(kernel='rbf', class_weight=class_weights, C = C, gamma = gamma)
+    def train_svm(self, class_weights, C, degree):
+        clf = svm.SVC(kernel='poly', degree=degree, C=C, class_weight=class_weights)
         clf.fit(self.X_train_normalized, self.y_train)
         return clf
 
