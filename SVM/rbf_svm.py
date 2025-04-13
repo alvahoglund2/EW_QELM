@@ -5,6 +5,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.lines import Line2D
+from multiprocessing import Process, Queue
 
 class rbf_svm:
     def __init__(self,
@@ -14,14 +15,19 @@ class rbf_svm:
                  y_test_path,
                  class_weights={-1: 1, 1: 1000},
                  C = 1,
-                 gamma = 0):
+                 gamma = 0,
+                 timer = False):
         
         print("Loading data...")
         self.X_train, self.y_train, self.X_test, self.y_test = self.load_data(X_train_path, y_train_path, X_test_path, y_test_path)
         print("Normalizing data...")
         self.X_train_normalized, self.X_test_normalized, self.scaler = self.normalize_data()
         print("Training SVM...")
-        self.clf = self.train_svm(class_weights, C, gamma)
+        self.clf = None
+        if timer:
+            self.clf = self.train_svm_timer(class_weights, C, gamma)
+        else:
+            self.clf = self.train_svm(class_weights, C, gamma)
 
 
     def load_data(self, X_train_path, y_train_path, X_test_path, y_test_path):
@@ -45,6 +51,33 @@ class rbf_svm:
             clf = svm.SVC(kernel='rbf', class_weight=class_weights, C = C, gamma = gamma)
         clf.fit(self.X_train_normalized, self.y_train)
         return clf
+
+    def train_worker(X, y, class_weights, C, gamma, queue):
+        try:
+            clf = svm.SVC(kernel='rbf', class_weight=class_weights, C=C,
+                        gamma=gamma if gamma != 0 else 'scale')
+            clf.fit(X, y)
+            queue.put(clf)
+        except Exception as e:
+            queue.put(e)
+
+    def train_svm_timer(self, class_weights, C, gamma, timeout_seconds=60):
+        queue = Queue()
+        p = Process(target=self.train_worker, args=(self.X_train_normalized, self.y_train, class_weights, C, gamma, queue))
+        p.start()
+        p.join(timeout_seconds)
+
+        if p.is_alive():
+            p.terminate()
+            p.join()
+            print("Training exceeded time limit.")
+            return None
+        else:
+            result = queue.get()
+            if isinstance(result, Exception):
+                print("Error during training:", result)
+                return None
+            return result
 
     def evaluate_model(self, evaluate_train):
         if evaluate_train:

@@ -21,7 +21,7 @@ def normalize_data(X_train, X_test):
     return X_train_scaled, X_test_scaled, scaler
 
 def train_svm(X_train_scaled, y_train):
-    clf = LinearSVC(penalty='l2', class_weight={-1: 1, 1: 1000})
+    clf = LinearSVC(penalty='l2', class_weight={-1: 1, 1: 1000}, C = 1000)
     clf.fit(X_train_scaled, y_train)
     return clf
 

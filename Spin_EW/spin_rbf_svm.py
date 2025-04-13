@@ -19,7 +19,7 @@ def normalize_data(X_train, X_test):
     return X_train_scaled, X_test_scaled
 
 def train_svm(X_train, y_train):
-    class_weights={-1: 1, 1: 1000}
+    class_weights={-1: 1, 1: 10000}
     clf = svm.SVC(kernel='rbf', class_weight=class_weights)
     clf.fit(X_train, y_train)
     return clf
@@ -45,7 +45,7 @@ def plot_data(X, y, clf, title=""):
         np.linspace(x3_min, x3_max, 100),
     )
 
-    #Compute desicion boundary
+    #Compute decision boundary
     grid_points = np.c_[x1.ravel(), x2.ravel(), x3.ravel()]
     decision_values = clf.decision_function(grid_points)
     boundary_points = grid_points[np.abs(decision_values) < 0.1]
@@ -80,7 +80,7 @@ def print_accuracy(clf, X_train_scaled, y_train, X_test_scaled, y_test):
     print(f"Test Accuracy (Entangled States): {accuracy_ent}")
 
 def main():
-    X_train, y_train, X_test, y_test = load_data("Spin_EW\data\measurements_test.npy", "Spin_EW\data\labels_train.npy", "Spin_EW\data\measurements_train.npy", "Spin_EW\data\labels_test.npy")
+    X_train, y_train, X_test, y_test = load_data("Spin_EW\da ta\measurements_test.npy", "Spin_EW\data\labels_train.npy", "Spin_EW\data\measurements_train.npy", "Spin_EW\data\labels_test.npy")
     
     X_train_scaled, X_test_scaled = normalize_data(X_train, X_test)
     clf = train_svm(X_train_scaled, y_train)
