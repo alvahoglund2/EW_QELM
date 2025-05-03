@@ -20,8 +20,8 @@ def plot_all_avg(ent_state_types, seeds, res_qds):
     qn_values = []
     for res_qd in res_qds:
         if res_qd <= 4:
-            #qn_values.append([i for i in range(0, res_qd*2+1)])
-            qn_values.append([1,2,3,4])
+            #qn_values.append([i for i in range(0, res_qd+1)])
+            qn_values.append([1])
         elif res_qd == 5:
             qn_values.append([0,1,2,3])
         elif res_qd == 6:
@@ -51,7 +51,8 @@ def plot_all_avg(ent_state_types, seeds, res_qds):
                         class_weights={-1: 1, 1: 10^5},
                         C=1,
                         gamma=1.5,
-                        timer = False
+                        timer = False,
+                        frac_data=1,
                     )
                     accuracy, accuracy_sep, accuracy_ent, _ = rsvm.evaluate_model(evaluate_train=False)
                     dec_val, p_idx = rsvm.get_desicion_values_for_data(f"Plots/Varying_qn/data_{ent_state_type}/measurements_werner_{ent_state_type}_res_{res_qd}_qn_{qn}_{seed}.npy",)
@@ -92,6 +93,6 @@ def plot_all_avg(ent_state_types, seeds, res_qds):
 
 if __name__ == "__main__":
     seeds = [4]
-    ent_state_types = ["singlet_state", "tripletp1_state"]
-    res_qds = [1,2,3,4,5,6]
+    ent_state_types = ["singlet_state", "triplet0_state","tripletn1_state", "tripletp1_state"]
+    res_qds = [2]
     plot_all_avg(ent_state_types, seeds, res_qds)

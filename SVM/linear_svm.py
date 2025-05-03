@@ -33,7 +33,7 @@ class linear_svm:
         return X_train_normalized, X_test_normalized, scaler
 
     def train_svm(self, class_weights, C):
-        clf = LinearSVC(penalty='l2', class_weight=class_weights, C = C)
+        clf = LinearSVC(penalty='l2', class_weight=class_weights, C = C, )
         clf.fit(self.X_train_normalized, self.y_train)
         return clf
 

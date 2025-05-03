@@ -99,6 +99,11 @@ def print_decision_boundaries():
     print(f"Tripletp1 state: wxx = {round(w3[0]/w3[0], 1)} wyy =  {round(w3[1]/w3[0], 1)}, wzz =  {round(w3[2]/w3[0],1)}  , b = {round(b3/w3[0],1)}")
     print(f"Tripletn1 state: wxx = {round(w4[0]/w4[0], 1)} wyy =  {round(w4[1]/w4[0], 1)}, wzz =  {round(w4[2]/w4[0],1)}  , b = {round(b4/w4[0],1)}")
 
+def print_accuracies():
+    lsvm1.print_accuracy()
+    lsvm2.print_accuracy()
+    lsvm3.print_accuracy()
+    lsvm4.print_accuracy()
 
 def plot_single_state_EWs():
     fig, axs = plt.subplots(2, 2, figsize=(10, 7), subplot_kw={'projection': '3d'})
@@ -144,4 +149,5 @@ def plot_robustness():
     plt.show()
 
 print_decision_boundaries()
+print_accuracies()
 plot_single_state_EWs()

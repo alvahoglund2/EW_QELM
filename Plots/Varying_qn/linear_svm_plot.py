@@ -35,7 +35,7 @@ def plot_seeds(ent_state_type, seeds, res_qd):
                 f"Plots/Varying_qn/States/train_labels.npy",
                 f"Plots/Varying_qn/data_{ent_state_type}/measurements_test_{ent_state_type}_res_{res_qd}_qn_{qn}_{seed}.npy",
                 f"Plots/Varying_qn/States/test_labels.npy",
-                class_weights={-1: 1, 1: 5000},
+                class_weights={-1: 1, 1: 1000},
                 C=1
             )
             accuracy, accuracy_sep, accuracy_ent, _ = lsvm.evaluate_model(evaluate_train=False)
@@ -86,7 +86,7 @@ def plot_ent_seed(ent_state_type, seeds, res_qds):
                     f"Plots/Varying_qn/data_{ent_state_type}/labels_train_res_{res_qd}_qn_{qn}_{seed}.npy",
                     f"Plots/Varying_qn/data_{ent_state_type}/measurements_test_res_{res_qd}_qn_{qn}_{seed}.npy",
                     f"Plots/Varying_qn/data_{ent_state_type}/labels_test_res_{res_qd}_qn_{qn}_{seed}.npy",
-                    class_weights={-1: 1, 1: 5000},
+                    class_weights={-1: 1, 1: 1000},
                     C=1
                 )
                 accuracy, accuracy_sep, accuracy_ent, _ = lsvm.evaluate_model(evaluate_train=False)
@@ -137,7 +137,7 @@ def plot_all(ent_state_types, seeds):
                         f"Plots/Varying_qn/data_{ent_state_type}/labels_train_res_{res_qd}_qn_{qn}_{seed}.npy",
                         f"Plots/Varying_qn/data_{ent_state_type}/measurements_test_res_{res_qd}_qn_{qn}_{seed}.npy",
                         f"Plots/Varying_qn/data_{ent_state_type}/labels_test_res_{res_qd}_qn_{qn}_{seed}.npy",
-                        class_weights={-1: 1, 1: 5000},
+                        class_weights={-1: 1, 1: 1000},
                         C=1
                     )
                     accuracy, accuracy_sep, accuracy_ent, _ = lsvm.evaluate_model(evaluate_train=False)
@@ -169,7 +169,7 @@ def plot_all_avg(ent_state_types, seeds):
     qn_values = [[0, 1, 2], [0, 1, 2, 3, 4], [0, 1, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 5, 6, 7, 8], [0, 1, 2, 3], [0,1]]
     
     fig, axes = plt.subplots(1, len(res_qds), figsize=(15, 8))
-
+    nbr_faulty = 0
     for i, res_qd in enumerate(res_qds):
         accuracies_ent_qd = []
         robustness_qd = []
@@ -187,17 +187,22 @@ def plot_all_avg(ent_state_types, seeds):
                         f"Plots/Varying_qn/States/train_labels.npy",
                         f"Plots/Varying_qn/data_{ent_state_type}/measurements_test_{ent_state_type}_res_{res_qd}_qn_{qn}_{seed}.npy",
                         f"Plots/Varying_qn/States/test_labels.npy",
-                        class_weights={-1: 1, 1: 5000},
+                        class_weights={-1: 1, 1: 1000},
                         C=1
                     )
-                    accuracy, accuracy_sep, accuracy_ent, _ = lsvm.evaluate_model(evaluate_train=False)
-                    
+                    accuracy, accuracy_sep_test, accuracy_ent_test, _ = lsvm.evaluate_model(evaluate_train=False)
+                    accuracy, accuracy_sep_train, accuracy_ent_train, _ = lsvm.evaluate_model(evaluate_train=True)
+
                     dec_val, p_idx = lsvm.get_desicion_values_for_data(f"Plots/Varying_qn/data_{ent_state_type}/measurements_werner_{ent_state_type}_res_{res_qd}_qn_{qn}_{seed}.npy",)
                     p_range = np.linspace(0, 1, len(dec_val))
                     p_tol = p_range[p_idx]
-                    accuracies_ent_qn.append(accuracy_ent)
+                    accuracies_ent_qn.append(accuracy_ent_test)
                     robustness_qn.append(p_tol)
-                    print(f"res_qd: {res_qd}, qn: {qn}, seed: {seed}, state: {ent_state_type} accuracy_sep: {accuracy_sep} accuracy_ent: {accuracy_ent}, robustness: {p_tol}")
+                    print(f"res_qd: {res_qd}, qn: {qn}, seed: {seed}, state: {ent_state_type}")
+                    print(f"accuracy_sep_train: {accuracy_sep_train} accuracy_ent_train: {accuracy_ent_train}")
+                    print(f"accuracy_sep_test: {accuracy_sep_test} accuracy_ent_test: {accuracy_ent_test}, robustness: {p_tol}")
+                    if accuracy_sep_train < 1.0 or accuracy_sep_test < 1:
+                        nbr_faulty += 1
                     
                 accuracies_ent_qd.append(accuracies_ent_qn)
                 robustness_qd.append(robustness_qn)
@@ -220,13 +225,16 @@ def plot_all_avg(ent_state_types, seeds):
         axes[i].set_xlabel('Particles in Reservoir', fontsize=12)
         axes[i].set_ylabel('Noise Tolerance', fontsize=12)
     plt.suptitle('Noise Tolerance for different Reservoir Settings')
-
+    
+    print(f"Number of faulty classifiers: {nbr_faulty}")
     plt.tight_layout(pad=3.0)
     plt.show()
+
 
 seeds = [1, 2, 4, 5, 6, 7]
 ent_state_types = ["singlet_state", "triplet0_state", "tripletn1_state", "Tripletp1_state"]
 res_qds = [1,2,3,4,5,6]
+
 #ent_state_types = ["singlet_state"]
 #plot_all(ent_state_types, seeds)
 #plot_all_avg(ent_state_types, seeds)

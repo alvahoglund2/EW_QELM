@@ -26,7 +26,7 @@ function compare_seeds_and_qn(res_qd, seeds, qns)
         for qn in qns 
             m = load("Plots/Evaluate_measurements/data/measmat_resqd_$(res_qd)_qn_$(qn)_seed_$(seed).jld2", "A")
             U, S, V = svd(Matrix(m))
-            count = sum(S .> 0.1)
+            count = sum(S./maximum(S) .> 0.1)
             push!(sv, count)
         end
     end
@@ -66,34 +66,56 @@ function compare_PC(res_qd, seeds, qns)
     return pc_nbr
 end
 
+function print_measmat(res_qd, qn, seed)
+    m = load("Plots/Evaluate_measurements/data/measmat_resqd_$(res_qd)_qn_$(qn)_seed_$(seed).jld2", "A")
+    println("Measurement matrix for res_qd: $(res_qd), qn: $(qn), seed: $(seed)")
+    m = Matrix(m)[:,6]
+    #Reshape m to a square matrix
+    m = reshape(m, Int(sqrt(length(m))), Int(sqrt(length(m))))
+end
 
-res_qd = 3
-seeds = [1, 2, 4]
-qn = [i for i in 0:res_qd*2]
+function sv_entropy(res_qd, qns)
+    sv = []
+    for qn in qns 
+        m = load("Plots/Evaluate_measurements/data/measmat_resqd_$(res_qd)_qn_$(qn)_seed_$(seed).jld2", "A")
+        U, S, V = svd(Matrix(m))
+        #Largest sv
 
-pc_nbr = compare_PC(res_qd, seeds, qn)
+        #calculate entropy of singluar values
+        #S = S[1:10]
+        e = S[1:10] ./ sum(S[1:10])
+        e = e .+ 1e-10
+        e = log.(e) ./ log(2)
+        e = -e
+        push!(sv, w)
+    end
+    return sv
+end
 
-plot(pc_nbr[qn.+1])
-plot!(pc_nbr[(qn.+1).*2])
-plot!(pc_nbr[(qn.+1).*3])
-
-
-
-#qn = [0, 1, 2,3, 4, 5]
-#sv_counts = compare_seeds_and_qn_ratio(res_qd, seeds, qn)
+res_qd = 4
+seeds = [1, 2, 3, 4]
+qn = [0:res_qd*2...]
+sv_counts = compare_seeds_and_qn(res_qd, seeds, qn)
 
 # Define plot
 using Plots
+plt = plot()
+i = 1
+s = 1
+n = length(qn)
+i = 1
+
+plot!(plt,qn, sv_counts[1+(i-1)*n:n+(i-1)*n], label="sv count, seed $(i)", xlabel="qn", ylabel="sv count", marker=:circle)
+i = 2
+plot!(plt,qn, sv_counts[1+(i-1)*n:n+(i-1)*n], label="sv count, seed $(i)", xlabel="qn", ylabel="sv count",marker=:circle)
+i = 3
+plot!(plt,qn, sv_counts[1+(i-1)*n:n+(i-1)*n], label="sv count, seed $(i)", xlabel="qn", ylabel="sv count",marker=:circle)
+i = 4
+plot!(plt,qn, sv_counts[1+(i-1)*n:n+(i-1)*n], label="sv count, seed $(i)", xlabel="qn", ylabel="sv count",marker=:circle)
 
 
-#plt = plot()
-#i = 1
-#s = 1
-#n = length(qn)
-#i = 1
 
-#plot!(plt,qn, sv_counts[1+(i-1)*n:n+(i-1)*n], label="sv count, seed $(i)", xlabel="qn", ylabel="sv count", marker=:circle)
-#i = 2
-#plot!(plt,qn, sv_counts[1+(i-1)*n:n+(i-1)*n], label="sv count, seed $(i)", xlabel="qn", ylabel="sv count",marker=:circle)
-#i = 3
-#plot!(plt,qn, sv_counts[1+(i-1)*n:n+(i-1)*n], label="sv count, seed $(i+1)", xlabel="qn", ylabel="sv count", marker=:circle)
+res_qd = 4
+qns = [0:res_qd*2...]
+
+entropy = sv_entropy(re)

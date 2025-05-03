@@ -29,7 +29,7 @@ def train_lsvm():
                         f"Plots/OneReservoir/data/data_{ent_state_type}/labels_train_res_{res_qd}_qn_{qn}_{seed}.npy",
                         f"Plots/OneReservoir/data/data_{ent_state_type}/measurements_test_res_{res_qd}_qn_{qn}_{seed}.npy",
                         f"Plots/OneReservoir/data/data_{ent_state_type}/labels_test_res_{res_qd}_qn_{qn}_{seed}.npy",
-                        class_weights={-1: 1, 1: 5000},
+                        class_weights={-1: 1, 1: 1000},
                         C=1,
                     )
         print("Finished training of:")
@@ -80,9 +80,9 @@ def train_rsvm():
                         f"Plots/OneReservoir/data/data_{ent_state_type}/labels_train_res_{res_qd}_qn_{qn}_{seed}.npy",
                         f"Plots/OneReservoir/data/data_{ent_state_type}/measurements_test_res_{res_qd}_qn_{qn}_{seed}.npy",
                         f"Plots/OneReservoir/data/data_{ent_state_type}/labels_test_res_{res_qd}_qn_{qn}_{seed}.npy",
-                        class_weights={-1: 1, 1: 10^5},
+                        class_weights={-1: 1, 1: 1000},
                         C=1,
-                        gamma = 0.5
+                        gamma = 1.5
                     )
 
         print("gamma: ")
@@ -129,9 +129,9 @@ def train_rsvm_multiple_states():
                     f"Plots/OneReservoir/data/data_all_states/labels_train_res_{res_qd}_qn_{qn}_{seed}.npy",
                     f"Plots/OneReservoir/data/data_all_states/measurements_test_res_{res_qd}_qn_{qn}_{seed}.npy",
                     f"Plots/OneReservoir/data/data_all_states/labels_test_res_{res_qd}_qn_{qn}_{seed}.npy",
-                    class_weights={-1: 1, 1: 10^5},
+                    class_weights={-1: 1, 1: 1000},
                     C=1,
-                    gamma=1.5
+                    gamma=0.5
                     )
     
     print("Finished training")
@@ -141,8 +141,12 @@ def train_rsvm_multiple_states():
         p_range = np.linspace(0, 1, len(dec_val))
         p_tol = p_range[p_idx]
         plt.axvline(x = p_tol, color='grey',  linestyle='-', linewidth=1, alpha=0.5)
-        plt.plot(np.linspace(0,1, len(dec_val)), dec_val, label=labels[ent_state_type], color=palette[ent_state_types.index(ent_state_type)])
-        print("Finished getting decision values")
+        plt.plot(np.linspace(0,1, len(dec_val)), dec_val, ':', linewidth = 2,  label=labels[ent_state_type], color=palette[ent_state_types.index(ent_state_type)])
+        print("State:" + ent_state_type)
+        print("p_tol:")
+        print(p_tol)
+        print()
+
         y_min = min(y_min, np.min(dec_val))
         y_max = max(y_max, np.max(dec_val))
     rsvm.print_accuracy()
@@ -158,10 +162,29 @@ def train_rsvm_multiple_states():
     #plt.axvspan(1/3, 1, ymin=0, ymax=y_zero_norm, facecolor=palette[0], alpha=0.2)
     plt.xlabel("p")
     plt.ylabel("Decision Value") 
-    plt.title(f"RBF Kernel - All States")
+    plt.title(f"Nonlinear EW - Multiple States")
+    plt.text(0.05, 0.25, 'True Separable', fontsize=10,)
+    plt.text(0.05, -0.5, 'False Entangled', fontsize=10,)
+    plt.text(0.77, 0.25, 'False Separable', fontsize=10,)
+    plt.text(0.77, -0.5, 'True Entangled', fontsize=10,)
     plt.legend()
     #plt.grid(True)
     plt.show()
+
+def print_EW():
+    ent_state_type = "singlet_state"
+    seed = 4
+    res_qd = 4
+    qn = 1
+    lsvm = linear_svm(
+                f"Plots/OneReservoir/data/data_{ent_state_type}/measurements_train_res_{res_qd}_qn_{qn}_seed_{seed}.npy",
+                f"Plots/OneReservoir/data/data_{ent_state_type}/labels_train_res_{res_qd}_qn_{qn}_{seed}.npy",
+                f"Plots/OneReservoir/data/data_{ent_state_type}/measurements_test_res_{res_qd}_qn_{qn}_{seed}.npy",
+                f"Plots/OneReservoir/data/data_{ent_state_type}/labels_test_res_{res_qd}_qn_{qn}_{seed}.npy",
+                class_weights={-1: 1, 1: 1000},
+                C=1
+            )
+    lsvm.print_weights()
 
 def plot_p ():
     ent_state_type = "singlet_state"
@@ -173,14 +196,15 @@ def plot_p ():
                 f"Plots/OneReservoir/data/data_{ent_state_type}/labels_train_res_{res_qd}_qn_{qn}_{seed}.npy",
                 f"Plots/OneReservoir/data/data_{ent_state_type}/measurements_test_res_{res_qd}_qn_{qn}_{seed}.npy",
                 f"Plots/OneReservoir/data/data_{ent_state_type}/labels_test_res_{res_qd}_qn_{qn}_{seed}.npy",
-                class_weights={-1: 1, 1: 5000},
+                class_weights={-1: 1, 1: 1000},
                 C=1
             )
     p_range, y_pred = lsvm.get_decision_values(False)
     plt.plot(p_range, y_pred, label=ent_state_type)
     plt.show()
-#train_lsvm()
+
 
 #train_lsvm()
-train_rsvm()
-#train_rsvm_multiple_states()
+#train_rsvm()
+train_rsvm_multiple_states()
+#print_EW()

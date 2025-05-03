@@ -11,26 +11,26 @@ includet("../src/generate_data.jl")
 
 function define_system_parameters()
     ent_state_types = [singlet_state]
-    noise_level_min = 1/3
+    noise_level_min = 1/2
 
     t_eval = 1.0
 
-    nbr_sep_states = 10000
+    nbr_sep_states = 40000
     nbr_mix_sep_states = 300000
     nbr_ent_states = nbr_sep_states+ nbr_mix_sep_states
     nbr_states = [nbr_ent_states, nbr_sep_states, nbr_mix_sep_states]
 
     sys_qd = 2
-    res_qd = 4
+    res_qd = 2
 
     conserved_qn = QuantumDots.fermionnumber
     d_tot = total_basis(sys_qd, res_qd, conserved_qn = conserved_qn)
     d, d_main, dA_main, dB_main, d_res = d_tot
     hamiltonian_type = Hdot_so_b
 
-    hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=3)
+    hamiltonian = random_hamiltonian(d, hamiltonian_type, seed=5)
 
-    qn = 1
+    qn = 0
     focknbrs = 2+qn
 
     ρ_R = res_ground_state(hamiltonian, d, d_res, qn)
@@ -61,4 +61,4 @@ function save_data()
     np.save("Charge_EW/data/labels_test.npy", labels_test)
 end
 
-@time save_data()
+save_data()

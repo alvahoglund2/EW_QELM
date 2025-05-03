@@ -21,7 +21,7 @@ rsvm = rbf_svm("Plots/SpinEW/data/multiple_state_measurements_train.npy",
                    "Plots/SpinEW/data/multiple_state_labels_train.npy",
                    "Plots/SpinEW/data/multiple_state_measurements_test.npy",
                    "Plots/SpinEW/data/multiple_state_labels_test.npy",
-                   class_weights={-1: 1, 1: 10^5},
+                   class_weights={-1: 1, 1: 1000},
                    C=1,)
 
 rsvm.print_accuracy()

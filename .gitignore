@@ -1,5 +1,5 @@
 # Ignore all .npy files
 *.npy
-
+*.jld2
 # Ignore all in folder Workbook
 Workbook/*

@@ -7,8 +7,8 @@ includet("../src/reservoir_state.jl")
 includet("../src/effective_measurements.jl")
 includet("generate_spin_measurements.jl")
 
-ent_state_types = [singlet_state, triplet0_state, tripletn1_state, tripletp1_state]
-noise_level_min = 0.5
+ent_state_types = [singlet_state]
+noise_level_min = 0.40
 nbr_ent_states = 10000
 nbr_sep_states = 10000
 

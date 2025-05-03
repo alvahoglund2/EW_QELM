@@ -16,26 +16,44 @@ class rbf_svm:
                  class_weights={-1: 1, 1: 1000},
                  C = 1,
                  gamma = 0,
-                 timer = False):
-        
+                 timer = False,
+                 frac_data = 1,):
         print("Loading data...")
         self.X_train, self.y_train, self.X_test, self.y_test = self.load_data(X_train_path, y_train_path, X_test_path, y_test_path)
+        if frac_data < 1:
+            self.X_train, self.y_train = self.split_data(self.X_train, self.y_train, frac_data)
+
         print("Normalizing data...")
         self.X_train_normalized, self.X_test_normalized, self.scaler = self.normalize_data()
         print("Training SVM...")
         self.clf = None
-        if timer:
-            self.clf = self.train_svm_timer(class_weights, C, gamma)
-        else:
-            self.clf = self.train_svm(class_weights, C, gamma)
+        self.clf = self.train_svm(class_weights, C, gamma)
 
 
     def load_data(self, X_train_path, y_train_path, X_test_path, y_test_path):
-        X_train = np.load(X_train_path)
-        y_train = np.load(y_train_path)
-        X_test = np.load(X_test_path)
-        y_test = np.load(y_test_path)
+        if isinstance(X_train_path, list):
+            X_train = np.concatenate([np.load(path) for path in X_train_path])
+            y_train = np.concatenate([np.load(path) for path in y_train_path])
+            X_test = np.concatenate([np.load(path) for path in X_test_path])
+            y_test = np.concatenate([np.load(path) for path in y_test_path])
+
+            frac_data = 1 / len(X_train_path)
+            X_train, y_train = self.split_data(X_train, y_train, frac_data)
+            X_test, y_test = self.split_data(X_test, y_test, frac_data)
+        else:
+            # Load the data from the specified paths
+            X_train = np.load(X_train_path)
+            y_train = np.load(y_train_path)
+            X_test = np.load(X_test_path)
+            y_test = np.load(y_test_path)
         return X_train, y_train, X_test, y_test
+
+    def split_data(self, X, y, frac_data):
+        n_train = int(X.shape[0] * frac_data)
+        idx = np.random.choice(X.shape[0], n_train, replace=False)
+        X = X[idx]
+        y = y[idx]
+        return X, y
 
     def normalize_data(self):
         scaler = StandardScaler()
@@ -48,36 +66,10 @@ class rbf_svm:
         if gamma == 0:
             clf = svm.SVC(kernel='rbf', class_weight=class_weights, C = C)
         else:
+            print(f"Gamma: {gamma}")
             clf = svm.SVC(kernel='rbf', class_weight=class_weights, C = C, gamma = gamma)
         clf.fit(self.X_train_normalized, self.y_train)
         return clf
-
-    def train_worker(X, y, class_weights, C, gamma, queue):
-        try:
-            clf = svm.SVC(kernel='rbf', class_weight=class_weights, C=C,
-                        gamma=gamma if gamma != 0 else 'scale')
-            clf.fit(X, y)
-            queue.put(clf)
-        except Exception as e:
-            queue.put(e)
-
-    def train_svm_timer(self, class_weights, C, gamma, timeout_seconds=60):
-        queue = Queue()
-        p = Process(target=self.train_worker, args=(self.X_train_normalized, self.y_train, class_weights, C, gamma, queue))
-        p.start()
-        p.join(timeout_seconds)
-
-        if p.is_alive():
-            p.terminate()
-            p.join()
-            print("Training exceeded time limit.")
-            return None
-        else:
-            result = queue.get()
-            if isinstance(result, Exception):
-                print("Error during training:", result)
-                return None
-            return result
 
     def evaluate_model(self, evaluate_train):
         if evaluate_train:
@@ -100,6 +92,7 @@ class rbf_svm:
         print(f"Training Accuracy Entangled: {accuracy_ent}")
 
         accuracy, accuracy_sep, accuracy_ent, y_pred = self.evaluate_model(evaluate_train=False)
+        print(f"Size of test data: {self.X_test_normalized.shape[0]}")
         print(f"Test Accuracy: {accuracy}")
         print(f"Test Accuracy Separable: {accuracy_sep}")
         print(f"Test Accuracy Entangled: {accuracy_ent}")
@@ -125,7 +118,6 @@ class rbf_svm:
             Line2D([0], [0], marker='o', color='w', markerfacecolor='red', markersize=10, label='Werner states, p>0.5'),
         ]
         ax.legend(handles=legend_elements, loc='best')
-
         plt.show()
     
     def get_desicion_values_for_data(self, X_path):

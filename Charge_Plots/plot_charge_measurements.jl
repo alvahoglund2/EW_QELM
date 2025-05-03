@@ -16,13 +16,13 @@ function define_system_parameters()
     ent_state_types = [triplet0_state]
 
     #Nuber of states
-    nbr_sep_states = 10000
-    nbr_mix_sep_states = 300000
+    nbr_sep_states = 40000
+    nbr_mix_sep_states = 100000
     nbr_ent_states = nbr_sep_states+ nbr_mix_sep_states
     nbr_states = [nbr_ent_states, nbr_sep_states, nbr_mix_sep_states]
 
     #Noise level for Werner states
-    noise_level_min = 1/3
+    noise_level_min = 1/2
     t_eval = 1.0
 
     #------- System parameters -------
@@ -67,15 +67,36 @@ function pca_plot(all_measurements, ent_measurements, sep_measurements, mix_sep_
     scatter!(pca_mix_sep_measurements[1,:], pca_mix_sep_measurements[2,:], pca_mix_sep_measurements[3,:], label = "mix_sep")
 end
 
-function measurements_plot()
+function pca_plot2(all_measurements, ent_measurements, sep_measurements, mix_sep_measurements)
+    pca = fit(PCA, real(all_measurements)', maxoutdim=2, pratio=1.0)
+    pca_sep_measurements = predict(pca, real(sep_measurements)')
+    pca_ent_measurements = predict(pca, real(ent_measurements)')
+    pca_mix_sep_measurements = predict(pca, real(mix_sep_measurements)')
+
+    scatter(pca_sep_measurements[1,:], pca_sep_measurements[2,:], label = "sep")
+    scatter!(pca_ent_measurements[1,:], pca_ent_measurements[2,:], label="ent")
+    scatter!(pca_mix_sep_measurements[1,:], pca_mix_sep_measurements[2,:], label = "mix_sep")
+end
+
+function measurements_plot(sep_measurements, ent_measurements, mix_sep_measurements)
 
     scatter(sep_measurements[:,1], sep_measurements[:,2], sep_measurements[:,6], label="sep")
     scatter!(ent_measurements[:,1], ent_measurements[:,2], ent_measurements[:,6], label="ent")
     scatter!(mix_sep_measurements[:,1], mix_sep_measurements[:,2], mix_sep_measurements[:,6], label="mix_sep")
 end
 
+
+function measurements_plot2(ent_measurements, sep_measurements, mix_sep_measurements)
+
+    scatter(sep_measurements[:,6], sep_measurements[:,1], label="sep")
+    #scatter!(ent_measurements[:,1], ent_measurements[:,2], label="ent")
+    scatter!(mix_sep_measurements[:,6], mix_sep_measurements[:,1], label="mix_sep")
+end
+
 ent_measurements, sep_measurements, mix_sep_measurements = get_data()
 all_measurements = vcat(ent_measurements, sep_measurements, mix_sep_measurements)
-pca_plot(all_measurements, ent_measurements, sep_measurements, mix_sep_measurements)
+pca_plot2(all_measurements, ent_measurements, sep_measurements, mix_sep_measurements)
+
+#measurements_plot2(ent_measurements, sep_measurements, mix_sep_measurements)
 
 
